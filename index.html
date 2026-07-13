@@ -27,7 +27,7 @@
   --navy:#0C1F3A;--blue:#185FA5;--blue-light:#E6F1FB;
   --green:#2D6A2D;--green-light:#EAF5EA;
   --amber:#8B6000;--amber-light:#FFF8E1;
-  --red:#8B1A1A;--border:#E0DDD8;
+  --red:#8B1A1A;--red-light:#FDEBEB;--border:#E0DDD8;
   --text:#1A1A1A;--text2:#5A5A5A;--text3:#9A9A9A;
   --gray:#F5F5F3;--card:#fff;--bg:#F0EDE8;--th:#FAFAF8;--rowline:#F0EDE8;
   --serif:'Merriweather',Georgia,serif;--sans:'Be Vietnam Pro',sans-serif;
@@ -37,7 +37,7 @@ body.dark{
   --navy:#0A1424;--blue:#4FA3E3;--blue-light:#1B2C44;
   --green:#7BC47F;--green-light:#16301C;
   --amber:#E0B24A;--amber-light:#2E2611;
-  --red:#E57373;--border:#2A3446;
+  --red:#E57373;--red-light:#341818;--border:#2A3446;
   --text:#E8ECF2;--text2:#AEB6C2;--text3:#7A8390;
   --gray:#1C2634;--card:#141C28;--bg:#0C121C;--th:#182130;--rowline:#1E2836;
 }
@@ -126,6 +126,7 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--th)}
 .st-ok{display:inline-flex;align-items:center;gap:3px;background:var(--green-light);color:var(--green);font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
 .st-warn{display:inline-flex;align-items:center;gap:3px;background:var(--amber-light);color:var(--amber);font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid #D4A017}
+.st-late{display:inline-flex;align-items:center;gap:3px;background:var(--red-light);color:var(--red);font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;white-space:nowrap;border:1px solid #C62828}
 .st-soon{display:inline-flex;align-items:center;gap:3px;background:var(--amber-light);color:var(--amber);font-size:11px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
 .st-no{color:var(--text3);font-size:12px;font-style:italic}
 .days-pill{font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:4px}
@@ -145,6 +146,37 @@ tr:hover td{background:var(--th)}
 .ab.an{background:var(--green-light);border-color:#4CAF50;color:var(--green)}
 .ab.nt{border-color:#FFB300;color:#E65100;background:#FFF8E1}
 .empty{padding:40px;text-align:center;color:var(--text3);font-size:13px;font-style:italic}
+
+/* VIEW TOGGLE */
+.vtg{display:inline-flex;gap:3px;background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:3px}
+.vtb{background:none;border:none;border-radius:6px;padding:5px 9px;font-size:13px;color:var(--text3);cursor:pointer;display:flex;align-items:center}
+.vtb.on{background:var(--card);color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.08)}
+body.dark .vtb.on{color:var(--blue)}
+
+/* CUSTOMER CARDS */
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:13px 14px;display:flex;flex-direction:column;gap:8px}
+.ccard:hover{border-color:#999}
+.cc-top{display:flex;align-items:flex-start;gap:9px}
+.cc-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--blue-light);color:var(--blue)}
+.cc-av.t-v{background:#FFF3E0;color:#BF360C}
+.cc-av.t-d{background:#F3E5F5;color:#6A1B9A}
+.cc-av.t-g{background:#FFF8E1;color:#E65100}
+.cc-nm{font-weight:600;font-size:13.5px;cursor:pointer;line-height:1.3}
+.cc-nm:hover{color:var(--blue)}
+.cc-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:3px}
+.cc-von{font-size:12px;color:var(--text2);font-weight:500}
+.cc-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text3)}
+.cc-spark{display:flex;align-items:flex-end;gap:2px;height:22px}
+.cc-spark b{display:block;width:6px;border-radius:2px 2px 0 0;background:var(--border)}
+.cc-spark b.hi{background:var(--blue)}
+body.dark .cc-spark b.hi{background:var(--blue)}
+.cc-note{font-size:11px;color:var(--text3);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.cc-note:hover{color:var(--blue);text-decoration:underline}
+.cc-acts{display:flex;gap:5px;border-top:1px solid var(--rowline);padding-top:8px;margin-top:2px}
+.cc-ab{flex:1;background:none;border:1px solid var(--border);border-radius:7px;padding:5px 0;font-size:12px;cursor:pointer;color:var(--text2);text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px}
+.cc-ab:hover{background:var(--gray)}
+.cc-tier-sel{border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text2);font-family:var(--sans);font-size:11px;padding:5px 4px;flex:1}
 
 /* KANBAN */
 .kan{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
@@ -409,10 +441,10 @@ async function verifyPw(u, input){
 // HIỆN TẠI: tất cả để allow:null => mọi người xem toàn bộ (theo yêu cầu).
 // Muốn giới hạn sau này: đổi allow của từng member thành mảng ID, VD allow:['BIA4','BKVE']
 const USERS = [
-  {name:'Nam',  id:'nam',  pw:'Nam2506',  color:'#534AB7', role:'admin',  allow:null},
-  {name:'Hiếu', id:'hieu', pw:'Hieu2611', color:'#185FA5', role:'member', allow:null},
-  {name:'Linh', id:'linh', pw:'Linh2210', color:'#0F6E56', role:'member', allow:null},
-  {name:'Đức',  id:'duc',  pw:'Duc1307',  color:'#854F0B', role:'member', allow:null},
+  {name:'Nam',  id:'nam',  color:'#534AB7', role:'admin',  allow:null},
+  {name:'Hiếu', id:'hieu', color:'#185FA5', role:'member', allow:null},
+  {name:'Linh', id:'linh', color:'#0F6E56', role:'member', allow:null},
+  {name:'Đức',  id:'duc',  color:'#854F0B', role:'member', allow:null},
 ];
 let selU=null, curU=null;
 
@@ -490,8 +522,9 @@ let C={}, IDS=['E408','BCF6','BIA4','BGPD','BLQJ','BKVE','BTKW'];
 let LOGS=[], pg='dash', curID=null, curF='all', selVip='none', selIDC='#185FA5';
 let tierFixed=false;
 let advTier='', advID='', advStat='';
-let chTier=null, chWeek=null;
+let chTier=null, chWeek=null, chMember=null;
 let kanID='';
+let viewMode=localStorage.getItem('viewMode')||'list';
 // Các giai đoạn phễu bán hàng
 const STAGES=[
   {k:'lead',      t:'Lead mới',        c:'#9E9E9E', i:'ti-user-plus'},
@@ -535,6 +568,7 @@ function startApp(){
 
 // ── PERMISSION ──
 function allowedIDs(){ return (curU&&curU.role==='member'&&Array.isArray(curU.allow))?curU.allow:IDS; }
+function allowedIDsFor(u){ return (u&&u.role==='member'&&Array.isArray(u.allow))?u.allow:IDS; }
 function canSee(c){ const a=allowedIDs(); return a===IDS?true:a.includes(c.idNhom); }
 function visibleIDs(){ const a=allowedIDs(); return IDS.filter(id=>a===IDS||a.includes(id)); }
 
@@ -567,7 +601,17 @@ function reminderDue(c){
 }
 function needMsg(c){ return dDays(c.ngay)>=tLimit(c.vip||'none') || reminderDue(c); }
 function daysLeft(c){ return tLimit(c.vip||'none')-dDays(c.ngay); } // >0 còn hạn, <=0 quá hạn
+function isOverdue(c){ return !!c.ngay && daysLeft(c)<=0; } // đã quá hạn — đỏ
+function isSoonDue(c){ return !!c.ngay && daysLeft(c)>0 && daysLeft(c)<=2; } // sắp quá hạn (còn 1-2 ngày) — vàng
 function todayS(){ const t=new Date(); return t.getDate()+'/'+(t.getMonth()+1)+'/'+t.getFullYear(); }
+// Trạng thái dùng chung cho bảng, thẻ, kanban
+function statusHtml(c){
+  const d=dDays(c.ngay), lim=tLimit(c.vip||'none'), left=lim-d;
+  if(!c.ngay) return '<span class="st-no">Chưa nhắn</span>';
+  if(left<=0) return `<span class="st-late"><i class="ti ti-alert-triangle" style="font-size:10px"></i>Quá hạn ${Math.abs(left)}n<span class="days-pill" style="background:#C62828;color:#fff">${d}/${lim}</span></span>`;
+  if(left<=2) return `<span class="st-soon"><i class="ti ti-clock" style="font-size:10px"></i>Còn ${left}n<span class="days-pill" style="background:#F9A825;color:#3a2c00">${d}/${lim}</span></span>`;
+  return `<span class="st-ok"><i class="ti ti-check" style="font-size:10px"></i>Còn ${left}n<span class="days-pill" style="background:#C8E6C9;color:#1B5E20">${d}/${lim}</span></span>`;
+}
 // Loại tương tác
 const ITYPES={call:{i:'ti-phone',t:'Gọi điện',c:'#2D6A2D'},zalo:{i:'ti-brand-zalo',t:'Zalo',c:'#185FA5'},meet:{i:'ti-users',t:'Gặp mặt',c:'#6A1B9A'},report:{i:'ti-file-text',t:'Gửi báo cáo',c:'#E65100'},other:{i:'ti-note',t:'Khác',c:'#5A5A5A'}};
 let selIType='call';
@@ -689,6 +733,10 @@ function rReport(){
   });
   h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Tính từ nhật ký hoạt động gần đây. Đủ chính xác khi cả team dùng thường xuyên.</div></div>`;
 
+  h+=`<div class="chcard" style="margin-bottom:16px"><h4><i class="ti ti-chart-bar"></i> Khách đã chăm sóc / còn tồn đọng theo từng thành viên</h4>
+    <div class="chwrap" style="height:220px"><canvas id="chMember"></canvas></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic">* Tính theo phạm vi ID mỗi thành viên được gán quản lý (mục Users → allow). Nếu chưa gán riêng cho từng người, số liệu sẽ giống nhau vì mặc định ai cũng thấy toàn bộ khách.</div></div>`;
+
   h+=`<div class="chgrid">
     <div class="chcard"><h4><i class="ti ti-target"></i> Tỷ lệ đúng hạn theo ID</h4><div class="tc"><table><thead><tr><th>ID</th><th>KH</th><th>Quá hạn</th><th>Đúng hạn</th></tr></thead><tbody>`;
   visibleIDs().forEach(id=>{const ks=all.filter(c=>c.idNhom===id);const od=ks.filter(c=>needMsg(c)).length;const r=ks.length?Math.round((ks.length-od)/ks.length*100):100;
@@ -699,6 +747,7 @@ function rReport(){
   h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Điền "Nguồn khách hàng" khi thêm/sửa để phân tích nguồn nào ra khách chất lượng.</div></div>
   </div>`;
   document.getElementById('MC').innerHTML=h;
+  drawMemberChart(all);
 }
 
 // ── PHỄU KANBAN ──
@@ -708,7 +757,7 @@ function kanCard(c){
     c.vip==='gold'?'<span class="t-gold" style="font-size:10px"><i class="ti ti-medal" style="font-size:9px"></i>Gold</span>':
     '<span class="t-thu" style="font-size:10px">Thường</span>';
   const sel=`<select class="kan-sel" onchange="kanMove('${c._k}',this.value)" onclick="event.stopPropagation()">${STAGES.map(s=>`<option value="${s.k}"${getStage(c)===s.k?' selected':''}>➜ ${s.t}</option>`).join('')}</select>`;
-  const urg=needMsg(c)?' <span title="Cần nhắn" style="color:#C62828">●</span>':'';
+  const urg=isOverdue(c)?' <span title="Đã quá hạn" style="color:#C62828">●</span>':isSoonDue(c)?' <span title="Sắp quá hạn" style="color:#F9A825">●</span>':needMsg(c)?' <span title="Cần nhắn" style="color:#C62828">●</span>':'';
   return`<div class="kan-card" draggable="true" ondragstart="kanDrag(event,'${c._k}')" onclick="openSP('${c._k}')">
     <div class="kan-nm">${c.hoTen||''}${urg}</div>
     <div class="kan-meta"><span class="id-c">${c.idNhom||''}</span> ${tb}</div>
@@ -721,7 +770,7 @@ function rKanban(){
   const list=kanID?all.filter(c=>c.idNhom===kanID):all;
   let h=`<div class="advbar"><label>Lọc ID:</label>
     <select onchange="setKanID(this.value)"><option value="">Tất cả (${all.length})</option>${visibleIDs().map(id=>`<option value="${id}"${kanID===id?' selected':''}>${id} (${all.filter(c=>c.idNhom===id).length})</option>`).join('')}</select>
-    <span style="font-size:11px;color:var(--text3)"><i class="ti ti-info-circle"></i> Kéo thẻ sang cột khác, hoặc dùng ô "➜" trên thẻ. Bấm thẻ để xem/nhật ký. ● đỏ = cần nhắn.</span></div>`;
+    <span style="font-size:11px;color:var(--text3)"><i class="ti ti-info-circle"></i> Kéo thẻ sang cột khác, hoặc dùng ô "➜" trên thẻ. Bấm thẻ để xem/nhật ký. ● đỏ = đã quá hạn, ● vàng = sắp quá hạn.</span></div>`;
   h+=`<div class="kan">`;
   STAGES.forEach(s=>{
     const items=list.filter(c=>getStage(c)===s.k).sort((a,b)=>(b.von||0)-(a.von||0));
@@ -799,8 +848,9 @@ function rSimple(list, type){
       </select>
       <span style="font-size:11px;color:var(--text3)">${show.length} khách</span>
       ${(advTier||advID||advStat)?`<button class="fb" onclick="setAdv('tier','');setAdv('id','');setAdv('stat','')">Xóa lọc</button>`:''}
+      <span style="margin-left:auto">${viewToggleHtml()}</span>
     </div>`;
-    document.getElementById('MC').innerHTML=adv+`<div class="tc">${buildRows(show)}</div>`;
+    document.getElementById('MC').innerHTML=adv+buildList(show);
     return;
   }
 
@@ -815,8 +865,9 @@ function rSimple(list, type){
     <button class="fb${curF==='urg'?' on':''}" onclick="setF('urg')" style="${urg>0?'color:var(--amber)':''}">Cần nhắn(${urg})</button>
     <button class="fb${curF==='ok'?' on':''}" onclick="setF('ok')">Còn hạn(${ok})</button>
     ${note?`<span style="font-size:11px;color:var(--text3);font-style:italic">${note}</span>`:''}
+    <span style="margin-left:auto">${viewToggleHtml()}</span>
   </div>
-  <div class="tc">${buildRows(show)}</div>`;
+  ${buildList(show)}`;
 }
 
 // ── RENDER ID ──
@@ -834,7 +885,8 @@ function rID(list){
     document.getElementById('MC').innerHTML=cb+`<div class="fr">
       <button class="fb" onclick="setF('all')">Tất cả(${list.length})</button>
       <button class="fb on">${curF==='urg'?'Cần nhắn':'Còn hạn'}(${fl.length})</button>
-    </div><div class="tc">${buildRows(fl)}</div>`;
+      <span style="margin-left:auto">${viewToggleHtml()}</span>
+    </div>${buildList(fl)}`;
     return;
   }
 
@@ -846,13 +898,14 @@ function rID(list){
   const sec=(title,bg,bd,col,icon,rows)=>rows.length===0?'':
     `<div class="tsec" style="background:${bg};border:1.5px solid ${bd}">
       <div class="tsec-t" style="color:${col}"><i class="ti ti-${icon}"></i>${title}(${rows.length})</div>
-      <div class="tc">${buildRows(rows)}</div>
+      ${buildList(rows)}
     </div>`;
 
   document.getElementById('MC').innerHTML=cb+`<div class="fr">
     <button class="fb on">Tất cả(${list.length})</button>
     <button class="fb${urg>0?' ':''}" onclick="setF('urg')" style="${urg>0?'color:var(--amber)':''}">Cần nhắn(${urg})</button>
     <button class="fb" onclick="setF('ok')">Còn hạn(${ok})</button>
+    <span style="margin-left:auto">${viewToggleHtml()}</span>
   </div>`+
   sec('VIP — trên 3 tỷ (nhắc 5 ngày)','#FFF3E0','#FF6D00','#BF360C','crown',V)+
   sec('Diamond — 1 tỷ đến 3 tỷ (nhắc 7 ngày)','#F3E5F5','#AB47BC','#6A1B9A','diamond',D)+
@@ -886,12 +939,13 @@ function rDash(){
   visibleIDs().forEach((id,i)=>{
     const ks=all.filter(c=>c.idNhom===id);
     const u=ks.filter(c=>needMsg(c)).length;
+    const od=ks.filter(c=>isOverdue(c)).length;
     const col=IDCOLS[i%IDCOLS.length];
     const pct=ks.length?Math.round((ks.length-u)/ks.length*100):100;
     h+=`<div class="ic" onclick="gID('${id}')">
-      <div class="ic-h"><div class="ic-n" style="color:${col}">${id}</div>${u>0?`<span class="st-warn"><i class="ti ti-alert-circle" style="font-size:10px"></i>${u}</span>`:`<span class="st-ok"><i class="ti ti-check" style="font-size:10px"></i>OK</span>`}</div>
+      <div class="ic-h"><div class="ic-n" style="color:${col}">${id}</div>${od>0?`<span class="st-late"><i class="ti ti-alert-triangle" style="font-size:10px"></i>${od}</span>`:u>0?`<span class="st-warn"><i class="ti ti-alert-circle" style="font-size:10px"></i>${u}</span>`:`<span class="st-ok"><i class="ti ti-check" style="font-size:10px"></i>OK</span>`}</div>
       <div class="ic-s"><div class="ic-ss"><span>${ks.length}</span> khách</div><div class="ic-ss"><span>${(ks.reduce((s,c)=>s+(c.von||0),0)/1e9).toFixed(1)}B</span></div></div>
-      <div class="pb"><div class="pf" style="width:${pct}%;background:${u>0?'#D4A017':col}"></div></div>
+      <div class="pb"><div class="pf" style="width:${pct}%;background:${od>0?'#C62828':u>0?'#D4A017':col}"></div></div>
     </div>`;
   });
   h+='</div>';
@@ -920,6 +974,28 @@ function drawCharts(all){
   chWeek=new Chart(we,{type:'bar',data:{labels:labs,datasets:[{label:'Khách được nhắn',data:buckets,backgroundColor:'#185FA5',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
 }
 
+// ── BIỂU ĐỒ HIỆU SUẤT THEO THÀNH VIÊN (đã chăm sóc / còn tồn đọng) ──
+function drawMemberChart(all){
+  const dark=document.body.classList.contains('dark');
+  const grid=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';
+  const txt=dark?'#AEB6C2':'#5A5A5A';
+  if(chMember){chMember.destroy();chMember=null;}
+  const el=document.getElementById('chMember');
+  if(!el||!window.Chart) return;
+  const labels=USERS.map(u=>u.name);
+  const done=[], pending=[];
+  USERS.forEach(u=>{
+    const scope=allowedIDsFor(u);
+    const own=scope===IDS?all:all.filter(c=>scope.includes(c.idNhom));
+    done.push(own.filter(c=>c.ngay&&!needMsg(c)).length);
+    pending.push(own.filter(c=>needMsg(c)).length);
+  });
+  chMember=new Chart(el,{type:'bar',data:{labels,datasets:[
+    {label:'Đã chăm sóc (còn hạn)',data:done,backgroundColor:'#2D6A2D',borderRadius:5},
+    {label:'Còn tồn đọng (cần nhắn)',data:pending,backgroundColor:'#C62828',borderRadius:5}
+  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:txt,font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:12,weight:'600'}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
+}
+
 // ── BUILD ROWS ──
 function buildRows(list){
   list = [...list].sort((a,b)=>(b.von||0)-(a.von||0));
@@ -927,11 +1003,7 @@ function buildRows(list){
   return`<table><thead><tr><th>Khách hàng</th><th>SĐT</th><th>STK</th><th>Số vốn</th><th>ID</th><th>Hạng</th><th>Lần nhắn</th><th>Trạng thái</th><th></th></tr></thead><tbody>${
   list.map(c=>{
     const d=dDays(c.ngay), lim=tLimit(c.vip||'none'), left=lim-d;
-    let st;
-    if(!c.ngay) st='<span class="st-no">Chưa nhắn</span>';
-    else if(left<=0) st=`<span class="st-warn"><i class="ti ti-alert-circle" style="font-size:10px"></i>Quá hạn ${Math.abs(left)}n<span class="days-pill" style="background:#C62828;color:#fff">${d}/${lim}</span></span>`;
-    else if(left<=2) st=`<span class="st-soon"><i class="ti ti-clock" style="font-size:10px"></i>Còn ${left}n<span class="days-pill" style="background:#F9A825;color:#3a2c00">${d}/${lim}</span></span>`;
-    else st=`<span class="st-ok"><i class="ti ti-check" style="font-size:10px"></i>Còn ${left}n<span class="days-pill" style="background:#C8E6C9;color:#1B5E20">${d}/${lim}</span></span>`;
+    const st=statusHtml(c);
     const ini=c.hoTen?c.hoTen.split(' ').slice(-2).map(w=>w[0]).join('').toUpperCase():'?';
     const tb=c.vip==='vip'?'<span class="t-vip"><i class="ti ti-crown" style="font-size:10px"></i>VIP</span>':
       c.vip==='diamond'?'<span class="t-dia"><i class="ti ti-diamond" style="font-size:10px"></i>Diamond</span>':
@@ -964,6 +1036,84 @@ function buildRows(list){
       </div></td>
     </tr>`;
   }).join('')}</tbody></table>`;
+}
+
+// ── BUILD CARDS (thẻ khách hàng) ──
+function buildCards(list){
+  list=[...list].sort((a,b)=>(b.von||0)-(a.von||0));
+  if(!list.length) return`<div class="empty"><i class="ti ti-inbox" style="font-size:26px;display:block;margin-bottom:8px"></i>Không có dữ liệu</div>`;
+  return list.map(c=>{
+    const key=c._k;
+    const id=c.idNhom||'';
+    const ini=c.hoTen?c.hoTen.split(' ').slice(-2).map(w=>w[0]).join('').toUpperCase():'?';
+    const tierCls=c.vip==='vip'?'t-v':c.vip==='diamond'?'t-d':c.vip==='gold'?'t-g':'';
+    const tb=c.vip==='vip'?'<span class="t-vip"><i class="ti ti-crown" style="font-size:9px"></i>VIP</span>':
+      c.vip==='diamond'?'<span class="t-dia"><i class="ti ti-diamond" style="font-size:9px"></i>Diamond</span>':
+      c.vip==='gold'?'<span class="t-gold"><i class="ti ti-medal" style="font-size:9px"></i>Gold</span>':
+      '<span class="t-thu">Thường</span>';
+    const note=c.ghiChu||'';
+    const noteEsc=note.replace(/"/g,'&quot;');
+    const sd=(c.sdt||'').replace(/[^\d+]/g,'');
+    const st=statusHtml(c);
+    const rem=c.nhacNgay?`<div style="font-size:10px;color:${reminderDue(c)?'#C62828':'var(--text3)'}">⏰ Hẹn ${c.nhacNgay}</div>`:'';
+    // Mini sparkline: 8 khung 5-ngày gần nhất, đếm số lần ghi nhật ký tương tác
+    const hist=Array.isArray(c.noteHist)?c.noteHist:[];
+    const now=Date.now();
+    const buckets=new Array(8).fill(0);
+    hist.forEach(n=>{ if(!n.time) return; const diff=Math.floor((now-n.time)/86400000); const b=Math.floor(diff/5); if(b>=0&&b<8) buckets[7-b]++; });
+    const maxB=Math.max(1,...buckets);
+    const spark=buckets.map(v=>`<b style="height:${v?Math.max(4,Math.round(v/maxB*20)):3}px" class="${v>0&&v===maxB?'hi':''}"></b>`).join('');
+    const tierSel=`<select class="cc-tier-sel" onchange="quickSetTier('${key}',this.value)" onclick="event.stopPropagation()" title="Đổi hạng nhanh">
+      <option value="vip"${c.vip==='vip'?' selected':''}>👑 VIP</option>
+      <option value="diamond"${c.vip==='diamond'?' selected':''}>💎 Diamond</option>
+      <option value="gold"${c.vip==='gold'?' selected':''}>🥇 Gold</option>
+      <option value="none"${(!c.vip||c.vip==='none')?' selected':''}>Thường</option>
+    </select>`;
+    return`<div class="ccard">
+      <div class="cc-top">
+        <div class="cc-av${tierCls?' '+tierCls:''}">${ini}</div>
+        <div style="flex:1;min-width:0">
+          <div class="cc-nm" onclick="openSP('${key}')">${c.hoTen||''}</div>
+          <div class="cc-meta"><span class="id-c">${id}</span>${tb}</div>
+        </div>
+      </div>
+      <div class="cc-row"><span class="cc-von">${c.von?Math.round(c.von).toLocaleString('vi-VN')+'đ':'—'}</span><span>${c.ngay||'Chưa nhắn'}</span></div>
+      <div class="cc-row" style="align-items:flex-end">
+        <div class="cc-spark" title="Tần suất chăm sóc gần đây (mỗi cột = 5 ngày)">${spark}</div>
+        <div>${st}</div>
+      </div>
+      ${rem}
+      ${note?`<div class="cc-note" onclick="openSP('${key}')" title="${noteEsc}">📝 ${note}</div>`:''}
+      <div class="cc-acts">
+        ${c.sdt?`<a class="cc-ab" href="tel:${sd}" title="Gọi"><i class="ti ti-phone"></i></a>`:'<span class="cc-ab" style="opacity:.3">—</span>'}
+        <button class="cc-ab" onclick="openSP('${key}')" title="Ghi chú"><i class="ti ti-notes"></i></button>
+        ${tierSel}
+        <button class="cc-ab" onclick="openModal('${key}')" title="Sửa"><i class="ti ti-edit"></i></button>
+      </div>
+    </div>`;
+  }).join('');
+}
+window.quickSetTier=function(key,tier){
+  const c=C[key]; if(!c) return;
+  if(DB) update(ref(DB,'customers/'+key),{vip:tier});
+  C[key]={...c,vip:tier};
+  addLog('edit','Đổi hạng nhanh: '+(c.hoTen||'')+' → '+tier);
+  showToast('Đã đổi hạng','ok');
+  refresh();
+};
+function toggleView(mode){
+  viewMode=mode; localStorage.setItem('viewMode',mode);
+  refresh();
+}
+window.toggleView=toggleView;
+function viewToggleHtml(){
+  return `<div class="vtg">
+    <button class="vtb${viewMode==='list'?' on':''}" onclick="toggleView('list')" title="Xem danh sách"><i class="ti ti-list"></i></button>
+    <button class="vtb${viewMode==='card'?' on':''}" onclick="toggleView('card')" title="Xem dạng thẻ"><i class="ti ti-layout-grid"></i></button>
+  </div>`;
+}
+function buildList(list){
+  return viewMode==='card'?`<div class="cardgrid">${buildCards(list)}</div>`:`<div class="tc">${buildRows(list)}</div>`;
 }
 
 // ── LOG ──
@@ -1100,7 +1250,7 @@ function saveSP(key){
   if(!note){showToast('Chưa nhập nội dung','warn');return;}
   const c=C[key]||{};
   const hist=Array.isArray(c.noteHist)?[...c.noteHist]:[];
-  const entry={text:note,type:selIType,by:curU?curU.name:'—',at:new Date().toLocaleString('vi-VN')};
+  const entry={text:note,type:selIType,by:curU?curU.name:'—',at:new Date().toLocaleString('vi-VN'),time:Date.now()};
   hist.push(entry);
   const t=todayS();
   const upd={ghiChu:note,noteHist:hist,ngay:t,nhacNgay:''}; // ghi nhật ký = đã liên hệ hôm nay
