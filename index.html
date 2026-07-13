@@ -173,10 +173,12 @@ body.dark .vtb.on{color:var(--blue)}
 body.dark .cc-spark b.hi{background:var(--blue)}
 .cc-note{font-size:11px;color:var(--text3);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
 .cc-note:hover{color:var(--blue);text-decoration:underline}
+.cc-msg{background:var(--green-light);border:1px solid #4CAF50;color:var(--green);border-radius:7px;padding:6px 0;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--sans)}
+.cc-msg:hover{filter:brightness(0.96)}
 .cc-acts{display:flex;gap:5px;border-top:1px solid var(--rowline);padding-top:8px;margin-top:2px}
 .cc-ab{flex:1;background:none;border:1px solid var(--border);border-radius:7px;padding:5px 0;font-size:12px;cursor:pointer;color:var(--text2);text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px}
 .cc-ab:hover{background:var(--gray)}
-.cc-tier-sel{border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text2);font-family:var(--sans);font-size:11px;padding:5px 4px;flex:1}
+.cc-tier-sel{border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text2);font-family:var(--sans);font-size:11px;padding:5px 4px;width:100%}
 
 /* KANBAN */
 .kan{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
@@ -1159,6 +1161,7 @@ function buildCards(list){
   return list.map(c=>{
     const key=c._k;
     const id=c.idNhom||'';
+    const hn=c.hoTen?c.hoTen.replace(/'/g,"\\'"):'';
     const ini=c.hoTen?c.hoTen.split(' ').slice(-2).map(w=>w[0]).join('').toUpperCase():'?';
     const tierCls=c.vip==='vip'?'t-v':c.vip==='diamond'?'t-d':c.vip==='gold'?'t-g':'';
     const tb=c.vip==='vip'?'<span class="t-vip"><i class="ti ti-crown" style="font-size:9px"></i>VIP</span>':
@@ -1198,12 +1201,14 @@ function buildCards(list){
       </div>
       ${rem}
       ${note?`<div class="cc-note" onclick="openSP('${key}')" title="${noteEsc}">📝 ${note}</div>`:''}
+      <button class="cc-msg" onclick="doMsg('${key}','${hn}','${id}')" title="Nhắn hôm nay"><i class="ti ti-message"></i> Nhắn hôm nay</button>
       <div class="cc-acts">
         ${c.sdt?`<a class="cc-ab" href="tel:${sd}" title="Gọi"><i class="ti ti-phone"></i></a>`:'<span class="cc-ab" style="opacity:.3">—</span>'}
         <button class="cc-ab" onclick="openSP('${key}')" title="Ghi chú"><i class="ti ti-notes"></i></button>
-        ${tierSel}
         <button class="cc-ab" onclick="openModal('${key}')" title="Sửa"><i class="ti ti-edit"></i></button>
+        <button class="cc-ab" onclick="doDel('${key}','${hn}')" title="Xóa"><i class="ti ti-trash" style="color:var(--red)"></i></button>
       </div>
+      ${tierSel}
     </div>`;
   }).join('');
 }
