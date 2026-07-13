@@ -744,17 +744,36 @@ function rReport(){
     else if(l.action==='confirm')perM[m].confirm++; else if(l.action==='add'||l.action==='edit'||l.action==='import')perM[m].edit++;
     if(l.action==='update'||l.action==='note'){ const ck=resolveCk(l,nameIdx); if(ck) perM[m].custSet.add(ck); }});
   const maxT=Math.max(1,...Object.values(perM).map(x=>x.total));
-  // Xu hướng chăm sóc theo tuần (6 tuần gần nhất) — số khách duy nhất mỗi người đã chăm sóc mỗi tuần
-  const NWK=6, now=Date.now();
-  const weekLabs=[]; for(let i=NWK-1;i>=0;i--){const d=new Date(now-i*7*86400000); weekLabs.push('T'+d.getDate()+'/'+(d.getMonth()+1));}
-  const wkTrend={}; USERS.forEach(u=>wkTrend[u.name]=new Array(NWK).fill(0).map(()=>new Set()));
+  // Xu hướng chăm sóc theo TỪNG NGÀY — từ ngày dữ liệu sớm nhất (tối đa 45 ngày để biểu đồ không quá dày)
+  const MAX_DAYS=45;
+  let minTs=null;
   LOGS.forEach(l=>{
-    if(!l.by||!wkTrend[l.by]) return;
+    if(l.action!=='update'&&l.action!=='note') return;
+    if(!resolveCk(l,nameIdx)) return;
+    if(minTs===null||l.time<minTs) minTs=l.time;
+  });
+  const today=new Date(); today.setHours(0,0,0,0);
+  let startDay=minTs?new Date(minTs):new Date(today);
+  startDay.setHours(0,0,0,0);
+  const capStart=new Date(today.getTime()-MAX_DAYS*86400000);
+  if(startDay<capStart) startDay=capStart;
+  const nDays=Math.max(1,Math.floor((today-startDay)/86400000)+1);
+  const dayLabs=[], dayKeys=[];
+  for(let i=0;i<nDays;i++){
+    const d=new Date(startDay.getTime()+i*86400000);
+    dayLabs.push(d.getDate()+'/'+(d.getMonth()+1));
+    dayKeys.push(d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate());
+  }
+  const dayIdxOf={}; dayKeys.forEach((k,i)=>dayIdxOf[k]=i);
+  const dayTrend={}; USERS.forEach(u=>dayTrend[u.name]=dayKeys.map(()=>new Set()));
+  LOGS.forEach(l=>{
+    if(!l.by||!dayTrend[l.by]) return;
     if(l.action!=='update'&&l.action!=='note') return;
     const ck=resolveCk(l,nameIdx); if(!ck) return;
-    const diff=Math.floor((now-l.time)/86400000); const wk=Math.floor(diff/7);
-    if(wk>=0&&wk<NWK) wkTrend[l.by][NWK-1-wk].add(ck);
+    const ld=new Date(l.time); const lk=ld.getFullYear()+'-'+ld.getMonth()+'-'+ld.getDate();
+    const idx=dayIdxOf[lk]; if(idx!==undefined) dayTrend[l.by][idx].add(ck);
   });
+  const trendRangeLabel=dayLabs.length?`${dayLabs[0]} → ${dayLabs[dayLabs.length-1]}`:'';
   // Nguồn khách
   const src={}; all.forEach(c=>{const s=(c.nguon||'').trim()||'(chưa ghi nguồn)'; if(!src[s])src[s]={n:0,von:0,vip:0}; src[s].n++; src[s].von+=(c.von||0); if(c.vip==='vip')src[s].vip++;});
   const srcArr=Object.entries(src).sort((a,b)=>b[1].von-a[1].von);
@@ -776,9 +795,9 @@ function rReport(){
 
   h+=`<div class="chgrid" style="margin-bottom:16px">
     <div class="chcard"><h4><i class="ti ti-chart-bar"></i> Số khách duy nhất đã chăm sóc (30 ngày)</h4><div class="chwrap" style="height:210px"><canvas id="chMemberBar"></canvas></div></div>
-    <div class="chcard"><h4><i class="ti ti-trending-up"></i> Xu hướng theo tuần (6 tuần gần nhất)</h4><div class="chwrap" style="height:210px"><canvas id="chMemberTrend"></canvas></div></div>
+    <div class="chcard"><h4><i class="ti ti-trending-up"></i> Xu hướng theo ngày${trendRangeLabel?' ('+trendRangeLabel+')':''}</h4><div class="chwrap" style="height:210px"><canvas id="chMemberTrend"></canvas></div></div>
   </div>
-  <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:16px;font-style:italic">* Cả 2 biểu đồ tính theo tài khoản đăng nhập thực hiện thao tác — đúng bản chất vì cả team nhắn linh hoạt giữa các ID, không gán cố định ai quản ID nào. Với các nhật ký từ trước khi có bản cập nhật này, hệ thống tự nhận diện lại khách hàng qua tên (và ID) ghi trong nội dung nhật ký — nếu 2 khách trùng tên hoàn toàn hoặc khách đã đổi tên sau đó, log đó sẽ không tính được vào số liệu. Đường xu hướng đi xuống liên tục ở ai đó là dấu hiệu đáng chú ý (có thể đang quá tải việc khác, hoặc đang lơ là).</div>`;
+  <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:16px;font-style:italic">* Cả 2 biểu đồ tính theo tài khoản đăng nhập thực hiện thao tác — đúng bản chất vì cả team nhắn linh hoạt giữa các ID, không gán cố định ai quản ID nào. Với các nhật ký từ trước khi có bản cập nhật này, hệ thống tự nhận diện lại khách hàng qua tên (và ID) ghi trong nội dung nhật ký — nếu 2 khách trùng tên hoàn toàn hoặc khách đã đổi tên sau đó, log đó sẽ không tính được vào số liệu. Biểu đồ xu hướng bắt đầu từ ngày dữ liệu sớm nhất (tối đa 45 ngày gần nhất) — rê chuột vào từng ngày để xem chính xác ai đã chăm sóc bao nhiêu khách hôm đó. Đường đi xuống liên tục ở ai đó là dấu hiệu đáng chú ý (có thể đang quá tải việc khác, hoặc đang lơ là).</div>`;
 
   h+=`<div class="chgrid">
     <div class="chcard"><h4><i class="ti ti-target"></i> Tỷ lệ đúng hạn theo ID</h4><div class="tc"><table><thead><tr><th>ID</th><th>KH</th><th>Quá hạn</th><th>Đúng hạn</th></tr></thead><tbody>`;
@@ -790,7 +809,7 @@ function rReport(){
   h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Điền "Nguồn khách hàng" khi thêm/sửa để phân tích nguồn nào ra khách chất lượng.</div></div>
   </div>`;
   document.getElementById('MC').innerHTML=h;
-  drawMemberChart(perM, wkTrend, weekLabs);
+  drawMemberChart(perM, dayTrend, dayLabs);
 }
 
 // ── PHỄU KANBAN ──
@@ -1017,8 +1036,8 @@ function drawCharts(all){
   chWeek=new Chart(we,{type:'bar',data:{labels:labs,datasets:[{label:'Khách được nhắn',data:buckets,backgroundColor:'#185FA5',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
 }
 
-// ── BIỂU ĐỒ HIỆU SUẤT THEO THÀNH VIÊN (khách duy nhất đã chăm sóc + xu hướng tuần) ──
-function drawMemberChart(perM, wkTrend, weekLabs){
+// ── BIỂU ĐỒ HIỆU SUẤT THEO THÀNH VIÊN (khách duy nhất đã chăm sóc + xu hướng theo ngày) ──
+function drawMemberChart(perM, dayTrend, dayLabs){
   const dark=document.body.classList.contains('dark');
   const grid=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';
   const txt=dark?'#AEB6C2':'#5A5A5A';
@@ -1034,8 +1053,8 @@ function drawMemberChart(perM, wkTrend, weekLabs){
     chMember=new Chart(barEl,{type:'bar',data:{labels,datasets:[{label:'Khách duy nhất',data,backgroundColor:colors,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:12,weight:'600'}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
   }
   if(trendEl){
-    const datasets=USERS.map(u=>({label:u.name,data:(wkTrend[u.name]||[]).map(s=>s.size),borderColor:u.color,backgroundColor:u.color,tension:.3,fill:false,pointRadius:3}));
-    chMemberTrend=new Chart(trendEl,{type:'line',data:{labels:weekLabs,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:txt,font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
+    const datasets=USERS.map(u=>({label:u.name,data:(dayTrend[u.name]||[]).map(s=>s.size),borderColor:u.color,backgroundColor:u.color,tension:.25,fill:false,pointRadius:3,pointHoverRadius:5}));
+    chMemberTrend=new Chart(trendEl,{type:'line',data:{labels:dayLabs,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:txt,font:{size:11},boxWidth:12}},tooltip:{mode:'index',intersect:false,callbacks:{title:(items)=>'Ngày '+items[0].label}}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10},autoSkip:false,maxRotation:60,minRotation:dayLabs.length>10?45:0}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
   }
 }
 
