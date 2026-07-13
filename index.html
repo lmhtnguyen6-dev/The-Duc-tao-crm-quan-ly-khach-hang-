@@ -525,6 +525,7 @@ let advTier='', advID='', advStat='';
 let chTier=null, chWeek=null, chMember=null, chMemberTrend=null;
 let kanID='';
 let viewMode=localStorage.getItem('viewMode')||'list';
+let reportRange='all'; // '7' | '30' | 'all' — khoảng thời gian cho biểu đồ hiệu suất member
 // Các giai đoạn phễu bán hàng
 const STAGES=[
   {k:'lead',      t:'Lead mới',        c:'#9E9E9E', i:'ti-user-plus'},
@@ -729,6 +730,24 @@ function resolveCk(l, idx){
   }
   return '';
 }
+// ── NGÀY NGHỈ (cuối tuần + lễ VN) — dùng để tô nền mờ trên biểu đồ xu hướng ──
+const VN_FIXED_HOLIDAYS=[{m:1,d:1,name:'Tết Dương lịch'},{m:4,d:30,name:'Ngày Thống nhất'},{m:5,d:1,name:'Quốc tế Lao động'},{m:9,d:1,name:'Nghỉ bù Quốc khánh'},{m:9,d:2,name:'Quốc khánh'}];
+// Tết Âm lịch đổi ngày dương lịch mỗi năm nên cần cập nhật thủ công theo từng năm
+const VN_LUNAR_HOLIDAYS_BY_YEAR={2026:[['2026-2-14','2026-2-22','Tết Nguyên Đán Bính Ngọ']]};
+function isWeekendDay(d){ const wd=d.getDay(); return wd===0||wd===6; }
+function vnHolidayName(d){
+  const m=d.getMonth()+1, day=d.getDate(), y=d.getFullYear();
+  const fx=VN_FIXED_HOLIDAYS.find(h=>h.m===m&&h.d===day); if(fx) return fx.name;
+  const ranges=VN_LUNAR_HOLIDAYS_BY_YEAR[y]||[];
+  for(const [s,e,name] of ranges){
+    const [sy,sm,sd]=s.split('-').map(Number), [ey,em,ed]=e.split('-').map(Number);
+    const sD=new Date(sy,sm-1,sd), eD=new Date(ey,em-1,ed);
+    if(d>=sD&&d<=eD) return name;
+  }
+  return '';
+}
+window.setReportRange=function(r){ reportRange=r; rReport(); };
+
 function rReport(){
   const all=getAll();
   const overdue=all.filter(c=>needMsg(c)).length;
@@ -744,8 +763,7 @@ function rReport(){
     else if(l.action==='confirm')perM[m].confirm++; else if(l.action==='add'||l.action==='edit'||l.action==='import')perM[m].edit++;
     if(l.action==='update'||l.action==='note'){ const ck=resolveCk(l,nameIdx); if(ck) perM[m].custSet.add(ck); }});
   const maxT=Math.max(1,...Object.values(perM).map(x=>x.total));
-  // Xu hướng chăm sóc theo TỪNG NGÀY — từ ngày dữ liệu sớm nhất (tối đa 45 ngày để biểu đồ không quá dày)
-  const MAX_DAYS=45;
+  // Xu hướng chăm sóc theo TỪNG NGÀY — theo khoảng thời gian đã chọn (7/30/tất cả)
   let minTs=null;
   LOGS.forEach(l=>{
     if(l.action!=='update'&&l.action!=='note') return;
@@ -753,27 +771,36 @@ function rReport(){
     if(minTs===null||l.time<minTs) minTs=l.time;
   });
   const today=new Date(); today.setHours(0,0,0,0);
-  let startDay=minTs?new Date(minTs):new Date(today);
-  startDay.setHours(0,0,0,0);
-  const capStart=new Date(today.getTime()-MAX_DAYS*86400000);
-  if(startDay<capStart) startDay=capStart;
+  let startDay;
+  if(reportRange==='7') startDay=new Date(today.getTime()-6*86400000);
+  else if(reportRange==='30') startDay=new Date(today.getTime()-29*86400000);
+  else { // 'all' — từ ngày dữ liệu sớm nhất, giới hạn tối đa 180 ngày để tránh quá dày
+    startDay=minTs?new Date(minTs):new Date(today); startDay.setHours(0,0,0,0);
+    const cap=new Date(today.getTime()-180*86400000);
+    if(startDay<cap) startDay=cap;
+  }
   const nDays=Math.max(1,Math.floor((today-startDay)/86400000)+1);
-  const dayLabs=[], dayKeys=[];
+  const dayLabs=[], dayKeys=[], dayMeta=[];
   for(let i=0;i<nDays;i++){
     const d=new Date(startDay.getTime()+i*86400000);
     dayLabs.push(d.getDate()+'/'+(d.getMonth()+1));
     dayKeys.push(d.getFullYear()+'-'+d.getMonth()+'-'+d.getDate());
+    const hol=vnHolidayName(d);
+    dayMeta.push({off:isWeekendDay(d)||!!hol, holiday:!!hol});
   }
   const dayIdxOf={}; dayKeys.forEach((k,i)=>dayIdxOf[k]=i);
-  const dayTrend={}; USERS.forEach(u=>dayTrend[u.name]=dayKeys.map(()=>new Set()));
+  const dayTrend={}, rangeCustSet={}; USERS.forEach(u=>{dayTrend[u.name]=dayKeys.map(()=>new Set()); rangeCustSet[u.name]=new Set();});
   LOGS.forEach(l=>{
     if(!l.by||!dayTrend[l.by]) return;
     if(l.action!=='update'&&l.action!=='note') return;
+    if(l.time<startDay.getTime()) return;
     const ck=resolveCk(l,nameIdx); if(!ck) return;
+    rangeCustSet[l.by].add(ck);
     const ld=new Date(l.time); const lk=ld.getFullYear()+'-'+ld.getMonth()+'-'+ld.getDate();
     const idx=dayIdxOf[lk]; if(idx!==undefined) dayTrend[l.by][idx].add(ck);
   });
   const trendRangeLabel=dayLabs.length?`${dayLabs[0]} → ${dayLabs[dayLabs.length-1]}`:'';
+  const rangeText=reportRange==='7'?'7 ngày gần nhất':reportRange==='30'?'30 ngày gần nhất':'tất cả (tối đa 180 ngày)';
   // Nguồn khách
   const src={}; all.forEach(c=>{const s=(c.nguon||'').trim()||'(chưa ghi nguồn)'; if(!src[s])src[s]={n:0,von:0,vip:0}; src[s].n++; src[s].von+=(c.von||0); if(c.vip==='vip')src[s].vip++;});
   const srcArr=Object.entries(src).sort((a,b)=>b[1].von-a[1].von);
@@ -793,11 +820,17 @@ function rReport(){
   });
   h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Tính từ nhật ký hoạt động theo tài khoản đăng nhập của từng người. "Khách duy nhất" = số khách hàng khác nhau đã nhắn/ghi nhật ký (không tính trùng nếu nhắn lại cùng 1 khách nhiều lần).</div></div>`;
 
-  h+=`<div class="chgrid" style="margin-bottom:16px">
-    <div class="chcard"><h4><i class="ti ti-chart-bar"></i> Số khách duy nhất đã chăm sóc (30 ngày)</h4><div class="chwrap" style="height:210px"><canvas id="chMemberBar"></canvas></div></div>
+  h+=`<div class="fr" style="margin-bottom:10px">
+    <span style="font-size:11px;color:var(--text3);margin-right:2px">Khoảng thời gian biểu đồ:</span>
+    <button class="fb${reportRange==='7'?' on':''}" onclick="setReportRange('7')">7 ngày</button>
+    <button class="fb${reportRange==='30'?' on':''}" onclick="setReportRange('30')">30 ngày</button>
+    <button class="fb${reportRange==='all'?' on':''}" onclick="setReportRange('all')">Tất cả</button>
+  </div>
+  <div class="chgrid" style="margin-bottom:16px">
+    <div class="chcard"><h4><i class="ti ti-chart-bar"></i> Số khách duy nhất đã chăm sóc (${rangeText})</h4><div class="chwrap" style="height:210px"><canvas id="chMemberBar"></canvas></div></div>
     <div class="chcard"><h4><i class="ti ti-trending-up"></i> Xu hướng theo ngày${trendRangeLabel?' ('+trendRangeLabel+')':''}</h4><div class="chwrap" style="height:210px"><canvas id="chMemberTrend"></canvas></div></div>
   </div>
-  <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:16px;font-style:italic">* Cả 2 biểu đồ tính theo tài khoản đăng nhập thực hiện thao tác — đúng bản chất vì cả team nhắn linh hoạt giữa các ID, không gán cố định ai quản ID nào. Với các nhật ký từ trước khi có bản cập nhật này, hệ thống tự nhận diện lại khách hàng qua tên (và ID) ghi trong nội dung nhật ký — nếu 2 khách trùng tên hoàn toàn hoặc khách đã đổi tên sau đó, log đó sẽ không tính được vào số liệu. Biểu đồ xu hướng bắt đầu từ ngày dữ liệu sớm nhất (tối đa 45 ngày gần nhất) — rê chuột vào từng ngày để xem chính xác ai đã chăm sóc bao nhiêu khách hôm đó. Đường đi xuống liên tục ở ai đó là dấu hiệu đáng chú ý (có thể đang quá tải việc khác, hoặc đang lơ là).</div>`;
+  <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:16px;font-style:italic">* Cả 2 biểu đồ tính theo tài khoản đăng nhập thực hiện thao tác — đúng bản chất vì cả team nhắn linh hoạt giữa các ID, không gán cố định ai quản ID nào. Với các nhật ký từ trước khi có bản cập nhật này, hệ thống tự nhận diện lại khách hàng qua tên (và ID) ghi trong nội dung nhật ký — nếu 2 khách trùng tên hoàn toàn hoặc khách đã đổi tên sau đó, log đó sẽ không tính được vào số liệu. Nền xám nhạt = thứ Bảy/Chủ nhật, nền đỏ nhạt = ngày lễ Việt Nam — số liệu tự nhiên thấp vào những ngày này không có nghĩa là ai đó đang lơ là. Rê chuột vào từng ngày để xem chính xác ai đã chăm sóc bao nhiêu khách hôm đó.</div>`;
 
   h+=`<div class="chgrid">
     <div class="chcard"><h4><i class="ti ti-target"></i> Tỷ lệ đúng hạn theo ID</h4><div class="tc"><table><thead><tr><th>ID</th><th>KH</th><th>Quá hạn</th><th>Đúng hạn</th></tr></thead><tbody>`;
@@ -809,7 +842,7 @@ function rReport(){
   h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Điền "Nguồn khách hàng" khi thêm/sửa để phân tích nguồn nào ra khách chất lượng.</div></div>
   </div>`;
   document.getElementById('MC').innerHTML=h;
-  drawMemberChart(perM, dayTrend, dayLabs);
+  drawMemberChart(rangeCustSet, dayTrend, dayLabs, dayMeta);
 }
 
 // ── PHỄU KANBAN ──
@@ -1037,7 +1070,26 @@ function drawCharts(all){
 }
 
 // ── BIỂU ĐỒ HIỆU SUẤT THEO THÀNH VIÊN (khách duy nhất đã chăm sóc + xu hướng theo ngày) ──
-function drawMemberChart(perM, dayTrend, dayLabs){
+function weekendHolidayPlugin(meta){
+  return {
+    id:'weekendHolidayShade',
+    beforeDatasetsDraw(chart){
+      const area=chart.chartArea, xScale=chart.scales.x;
+      if(!area||!xScale||!meta||!meta.length) return;
+      const ctx=chart.ctx, n=meta.length;
+      const bw=xScale.width/n;
+      ctx.save();
+      meta.forEach((m,i)=>{
+        if(!m.off) return;
+        const center=xScale.getPixelForValue(i);
+        ctx.fillStyle=m.holiday?'rgba(198,40,40,.09)':'rgba(90,90,90,.09)';
+        ctx.fillRect(center-bw/2, area.top, bw, area.bottom-area.top);
+      });
+      ctx.restore();
+    }
+  };
+}
+function drawMemberChart(rangeCustSet, dayTrend, dayLabs, dayMeta){
   const dark=document.body.classList.contains('dark');
   const grid=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';
   const txt=dark?'#AEB6C2':'#5A5A5A';
@@ -1049,12 +1101,12 @@ function drawMemberChart(perM, dayTrend, dayLabs){
   const labels=USERS.map(u=>u.name);
   const colors=USERS.map(u=>u.color);
   if(barEl){
-    const data=USERS.map(u=>perM[u.name]?perM[u.name].custSet.size:0);
+    const data=USERS.map(u=>rangeCustSet[u.name]?rangeCustSet[u.name].size:0);
     chMember=new Chart(barEl,{type:'bar',data:{labels,datasets:[{label:'Khách duy nhất',data,backgroundColor:colors,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:12,weight:'600'}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
   }
   if(trendEl){
     const datasets=USERS.map(u=>({label:u.name,data:(dayTrend[u.name]||[]).map(s=>s.size),borderColor:u.color,backgroundColor:u.color,tension:.25,fill:false,pointRadius:3,pointHoverRadius:5}));
-    chMemberTrend=new Chart(trendEl,{type:'line',data:{labels:dayLabs,datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:txt,font:{size:11},boxWidth:12}},tooltip:{mode:'index',intersect:false,callbacks:{title:(items)=>'Ngày '+items[0].label}}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10},autoSkip:false,maxRotation:60,minRotation:dayLabs.length>10?45:0}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
+    chMemberTrend=new Chart(trendEl,{type:'line',data:{labels:dayLabs,datasets},plugins:[weekendHolidayPlugin(dayMeta)],options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{position:'bottom',labels:{color:txt,font:{size:11},boxWidth:12}},tooltip:{mode:'index',intersect:false,callbacks:{title:(items)=>{const i=items[0].dataIndex;const m=dayMeta&&dayMeta[i];return 'Ngày '+items[0].label+(m&&m.holiday?' — Ngày lễ':m&&m.off?' — Cuối tuần':'');}}}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10},autoSkip:false,maxRotation:60,minRotation:dayLabs.length>10?45:0}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
   }
 }
 
