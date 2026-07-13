@@ -700,11 +700,41 @@ function refresh(){
 }
 
 // ── BÁO CÁO & HIỆU SUẤT ──
+const RE_LOG_UPDATE=/^Đã nhắn: (.+) \(([^)]*)\) — /;
+const RE_LOG_NOTE=/^(?:Gọi điện|Zalo|Gặp mặt|Gửi báo cáo|Khác) (.+?): /;
+function buildNameIndexes(){
+  // Dựng chỉ mục tên(+ID)→mã khách để nhận diện lại các log CŨ chưa lưu kèm mã khách (ck)
+  const byId={}, byName={}, idCnt={}, nameCnt={};
+  Object.entries(C).forEach(([k,c])=>{
+    const nm=(c.hoTen||'').trim().toLowerCase(); if(!nm) return;
+    const id=(c.idNhom||'').trim().toLowerCase();
+    const kId=nm+'|'+id;
+    idCnt[kId]=(idCnt[kId]||0)+1; byId[kId]=k;
+    nameCnt[nm]=(nameCnt[nm]||0)+1; byName[nm]=k;
+  });
+  Object.keys(idCnt).forEach(k=>{ if(idCnt[k]>1) delete byId[k]; }); // bỏ nếu trùng tên+ID (không chắc chắn)
+  Object.keys(nameCnt).forEach(k=>{ if(nameCnt[k]>1) delete byName[k]; }); // bỏ nếu trùng tên hoàn toàn
+  return {byId,byName};
+}
+function resolveCk(l, idx){
+  if(l.ck) return l.ck; // log mới đã lưu sẵn mã khách
+  if(!l.detail) return '';
+  if(l.action==='update'){
+    const m=l.detail.match(RE_LOG_UPDATE);
+    if(m){ const nm=m[1].trim().toLowerCase(), id=m[2].trim().toLowerCase();
+      return idx.byId[nm+'|'+id] || idx.byName[nm] || ''; }
+  } else if(l.action==='note'){
+    const m=l.detail.match(RE_LOG_NOTE);
+    if(m){ return idx.byName[m[1].trim().toLowerCase()] || ''; }
+  }
+  return '';
+}
 function rReport(){
   const all=getAll();
   const overdue=all.filter(c=>needMsg(c)).length;
   const contacted=all.filter(c=>c.ngay).length;
   const rate=all.length?Math.round((all.length-overdue)/all.length*100):100;
+  const nameIdx=buildNameIndexes();
   // Hiệu suất thành viên (30 ngày gần nhất, từ nhật ký hoạt động — theo tài khoản đăng nhập)
   const since=Date.now()-30*86400000;
   const recent=LOGS.filter(l=>l.time>=since);
@@ -712,17 +742,18 @@ function rReport(){
   recent.forEach(l=>{const m=l.by; if(!m||!perM[m])return; perM[m].total++;
     if(l.action==='update')perM[m].nhac++; else if(l.action==='note')perM[m].note++;
     else if(l.action==='confirm')perM[m].confirm++; else if(l.action==='add'||l.action==='edit'||l.action==='import')perM[m].edit++;
-    if((l.action==='update'||l.action==='note')&&l.ck) perM[m].custSet.add(l.ck);});
+    if(l.action==='update'||l.action==='note'){ const ck=resolveCk(l,nameIdx); if(ck) perM[m].custSet.add(ck); }});
   const maxT=Math.max(1,...Object.values(perM).map(x=>x.total));
   // Xu hướng chăm sóc theo tuần (6 tuần gần nhất) — số khách duy nhất mỗi người đã chăm sóc mỗi tuần
   const NWK=6, now=Date.now();
   const weekLabs=[]; for(let i=NWK-1;i>=0;i--){const d=new Date(now-i*7*86400000); weekLabs.push('T'+d.getDate()+'/'+(d.getMonth()+1));}
   const wkTrend={}; USERS.forEach(u=>wkTrend[u.name]=new Array(NWK).fill(0).map(()=>new Set()));
   LOGS.forEach(l=>{
-    if(!l.by||!wkTrend[l.by]||!l.ck) return;
+    if(!l.by||!wkTrend[l.by]) return;
     if(l.action!=='update'&&l.action!=='note') return;
+    const ck=resolveCk(l,nameIdx); if(!ck) return;
     const diff=Math.floor((now-l.time)/86400000); const wk=Math.floor(diff/7);
-    if(wk>=0&&wk<NWK) wkTrend[l.by][NWK-1-wk].add(l.ck);
+    if(wk>=0&&wk<NWK) wkTrend[l.by][NWK-1-wk].add(ck);
   });
   // Nguồn khách
   const src={}; all.forEach(c=>{const s=(c.nguon||'').trim()||'(chưa ghi nguồn)'; if(!src[s])src[s]={n:0,von:0,vip:0}; src[s].n++; src[s].von+=(c.von||0); if(c.vip==='vip')src[s].vip++;});
@@ -747,7 +778,7 @@ function rReport(){
     <div class="chcard"><h4><i class="ti ti-chart-bar"></i> Số khách duy nhất đã chăm sóc (30 ngày)</h4><div class="chwrap" style="height:210px"><canvas id="chMemberBar"></canvas></div></div>
     <div class="chcard"><h4><i class="ti ti-trending-up"></i> Xu hướng theo tuần (6 tuần gần nhất)</h4><div class="chwrap" style="height:210px"><canvas id="chMemberTrend"></canvas></div></div>
   </div>
-  <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:16px;font-style:italic">* Cả 2 biểu đồ tính theo tài khoản đăng nhập thực hiện thao tác — đúng bản chất vì cả team nhắn linh hoạt giữa các ID, không gán cố định ai quản ID nào. Đường xu hướng đi xuống liên tục ở ai đó là dấu hiệu đáng chú ý (có thể đang quá tải việc khác, hoặc đang lơ là).</div>`;
+  <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:16px;font-style:italic">* Cả 2 biểu đồ tính theo tài khoản đăng nhập thực hiện thao tác — đúng bản chất vì cả team nhắn linh hoạt giữa các ID, không gán cố định ai quản ID nào. Với các nhật ký từ trước khi có bản cập nhật này, hệ thống tự nhận diện lại khách hàng qua tên (và ID) ghi trong nội dung nhật ký — nếu 2 khách trùng tên hoàn toàn hoặc khách đã đổi tên sau đó, log đó sẽ không tính được vào số liệu. Đường xu hướng đi xuống liên tục ở ai đó là dấu hiệu đáng chú ý (có thể đang quá tải việc khác, hoặc đang lơ là).</div>`;
 
   h+=`<div class="chgrid">
     <div class="chcard"><h4><i class="ti ti-target"></i> Tỷ lệ đúng hạn theo ID</h4><div class="tc"><table><thead><tr><th>ID</th><th>KH</th><th>Quá hạn</th><th>Đúng hạn</th></tr></thead><tbody>`;
