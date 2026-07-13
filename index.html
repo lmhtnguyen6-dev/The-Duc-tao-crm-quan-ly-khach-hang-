@@ -409,10 +409,10 @@ async function verifyPw(u, input){
 // HIỆN TẠI: tất cả để allow:null => mọi người xem toàn bộ (theo yêu cầu).
 // Muốn giới hạn sau này: đổi allow của từng member thành mảng ID, VD allow:['BIA4','BKVE']
 const USERS = [
-  {name:'Nam',  id:'nam',  pw:'Nam2506',  color:'#534AB7', role:'admin',  allow:null},
-  {name:'Hiếu', id:'hieu', pw:'Hieu2611', color:'#185FA5', role:'member', allow:null},
-  {name:'Linh', id:'linh', pw:'Linh2210', color:'#0F6E56', role:'member', allow:null},
-  {name:'Đức',  id:'duc',  pw:'Duc1307',  color:'#854F0B', role:'member', allow:null},
+  {name:'Nam',  id:'nam',  color:'#534AB7', role:'admin',  allow:null},
+  {name:'Hiếu', id:'hieu', color:'#185FA5', role:'member', allow:null},
+  {name:'Linh', id:'linh', color:'#0F6E56', role:'member', allow:null},
+  {name:'Đức',  id:'duc',  color:'#854F0B', role:'member', allow:null},
 ];
 let selU=null, curU=null;
 
