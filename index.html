@@ -522,7 +522,7 @@ let C={}, IDS=['E408','BCF6','BIA4','BGPD','BLQJ','BKVE','BTKW'];
 let LOGS=[], pg='dash', curID=null, curF='all', selVip='none', selIDC='#185FA5';
 let tierFixed=false;
 let advTier='', advID='', advStat='';
-let chTier=null, chWeek=null, chMember=null;
+let chTier=null, chWeek=null, chMember=null, chMemberTrend=null;
 let kanID='';
 let viewMode=localStorage.getItem('viewMode')||'list';
 // Các giai đoạn phễu bán hàng
@@ -561,14 +561,13 @@ function startApp(){
   onValue(ref(DB,'idList'),snap=>{const v=snap.val();if(v&&Array.isArray(v))IDS=v;updateNav();refresh();});
   onValue(ref(DB,'history'),snap=>{
     const v=snap.val()||{};
-    LOGS=Object.values(v).sort((a,b)=>b.time-a.time).slice(0,80);
+    LOGS=Object.values(v).sort((a,b)=>b.time-a.time).slice(0,500);
     if(pg==='log') renderLog();
   });
 }
 
 // ── PERMISSION ──
 function allowedIDs(){ return (curU&&curU.role==='member'&&Array.isArray(curU.allow))?curU.allow:IDS; }
-function allowedIDsFor(u){ return (u&&u.role==='member'&&Array.isArray(u.allow))?u.allow:IDS; }
 function canSee(c){ const a=allowedIDs(); return a===IDS?true:a.includes(c.idNhom); }
 function visibleIDs(){ const a=allowedIDs(); return IDS.filter(id=>a===IDS||a.includes(id)); }
 
@@ -623,7 +622,7 @@ function showToast(msg,type=''){
   t.textContent=msg; t.className='toast show '+(type||'');
   setTimeout(()=>t.className='toast',2500);
 }
-function addLog(action,detail){ if(DB) push(ref(DB,'history'),{action,detail,by:curU?curU.name:'—',time:Date.now(),timeStr:new Date().toLocaleString('vi-VN')}); }
+function addLog(action,detail,ck){ if(DB) push(ref(DB,'history'),{action,detail,by:curU?curU.name:'—',time:Date.now(),timeStr:new Date().toLocaleString('vi-VN'),ck:ck||''}); }
 
 // ── THEME ──
 function loadTheme(){
@@ -706,14 +705,25 @@ function rReport(){
   const overdue=all.filter(c=>needMsg(c)).length;
   const contacted=all.filter(c=>c.ngay).length;
   const rate=all.length?Math.round((all.length-overdue)/all.length*100):100;
-  // Hiệu suất thành viên (30 ngày gần nhất, từ nhật ký hoạt động)
+  // Hiệu suất thành viên (30 ngày gần nhất, từ nhật ký hoạt động — theo tài khoản đăng nhập)
   const since=Date.now()-30*86400000;
   const recent=LOGS.filter(l=>l.time>=since);
-  const perM={}; USERS.forEach(u=>perM[u.name]={nhac:0,note:0,confirm:0,edit:0,total:0,color:u.color});
+  const perM={}; USERS.forEach(u=>perM[u.name]={nhac:0,note:0,confirm:0,edit:0,total:0,color:u.color,custSet:new Set()});
   recent.forEach(l=>{const m=l.by; if(!m||!perM[m])return; perM[m].total++;
     if(l.action==='update')perM[m].nhac++; else if(l.action==='note')perM[m].note++;
-    else if(l.action==='confirm')perM[m].confirm++; else if(l.action==='add'||l.action==='edit'||l.action==='import')perM[m].edit++;});
+    else if(l.action==='confirm')perM[m].confirm++; else if(l.action==='add'||l.action==='edit'||l.action==='import')perM[m].edit++;
+    if((l.action==='update'||l.action==='note')&&l.ck) perM[m].custSet.add(l.ck);});
   const maxT=Math.max(1,...Object.values(perM).map(x=>x.total));
+  // Xu hướng chăm sóc theo tuần (6 tuần gần nhất) — số khách duy nhất mỗi người đã chăm sóc mỗi tuần
+  const NWK=6, now=Date.now();
+  const weekLabs=[]; for(let i=NWK-1;i>=0;i--){const d=new Date(now-i*7*86400000); weekLabs.push('T'+d.getDate()+'/'+(d.getMonth()+1));}
+  const wkTrend={}; USERS.forEach(u=>wkTrend[u.name]=new Array(NWK).fill(0).map(()=>new Set()));
+  LOGS.forEach(l=>{
+    if(!l.by||!wkTrend[l.by]||!l.ck) return;
+    if(l.action!=='update'&&l.action!=='note') return;
+    const diff=Math.floor((now-l.time)/86400000); const wk=Math.floor(diff/7);
+    if(wk>=0&&wk<NWK) wkTrend[l.by][NWK-1-wk].add(l.ck);
+  });
   // Nguồn khách
   const src={}; all.forEach(c=>{const s=(c.nguon||'').trim()||'(chưa ghi nguồn)'; if(!src[s])src[s]={n:0,von:0,vip:0}; src[s].n++; src[s].von+=(c.von||0); if(c.vip==='vip')src[s].vip++;});
   const srcArr=Object.entries(src).sort((a,b)=>b[1].von-a[1].von);
@@ -726,16 +736,18 @@ function rReport(){
   </div>`;
 
   h+=`<div class="chcard" style="margin-bottom:16px"><h4><i class="ti ti-user-star"></i> Hiệu suất thành viên (30 ngày gần nhất)</h4>
-    <div class="tc"><table><thead><tr><th>Thành viên</th><th>Nhắn KH</th><th>Nhật ký</th><th>Xác nhận</th><th>Thêm/Sửa</th><th>Tổng</th><th style="width:30%">Mức độ</th></tr></thead><tbody>`;
+    <div class="tc"><table><thead><tr><th>Thành viên</th><th>Nhắn KH</th><th>Nhật ký</th><th>Xác nhận</th><th>Thêm/Sửa</th><th>Tổng</th><th>Khách duy nhất</th><th style="width:24%">Mức độ</th></tr></thead><tbody>`;
   Object.entries(perM).sort((a,b)=>b[1].total-a[1].total).forEach(([nm,x])=>{
-    h+=`<tr><td><b style="color:${x.color}">${nm}</b></td><td>${x.nhac}</td><td>${x.note}</td><td>${x.confirm}</td><td>${x.edit}</td><td><b>${x.total}</b></td>
+    h+=`<tr><td><b style="color:${x.color}">${nm}</b></td><td>${x.nhac}</td><td>${x.note}</td><td>${x.confirm}</td><td>${x.edit}</td><td><b>${x.total}</b></td><td><b>${x.custSet.size}</b></td>
       <td><div class="pb" style="height:8px"><div class="pf" style="width:${Math.round(x.total/maxT*100)}%;background:${x.color};height:8px"></div></div></td></tr>`;
   });
-  h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Tính từ nhật ký hoạt động gần đây. Đủ chính xác khi cả team dùng thường xuyên.</div></div>`;
+  h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Tính từ nhật ký hoạt động theo tài khoản đăng nhập của từng người. "Khách duy nhất" = số khách hàng khác nhau đã nhắn/ghi nhật ký (không tính trùng nếu nhắn lại cùng 1 khách nhiều lần).</div></div>`;
 
-  h+=`<div class="chcard" style="margin-bottom:16px"><h4><i class="ti ti-chart-bar"></i> Khách đã chăm sóc / còn tồn đọng theo từng thành viên</h4>
-    <div class="chwrap" style="height:220px"><canvas id="chMember"></canvas></div>
-    <div style="font-size:11px;color:var(--text3);margin-top:8px;font-style:italic">* Tính theo phạm vi ID mỗi thành viên được gán quản lý (mục Users → allow). Nếu chưa gán riêng cho từng người, số liệu sẽ giống nhau vì mặc định ai cũng thấy toàn bộ khách.</div></div>`;
+  h+=`<div class="chgrid" style="margin-bottom:16px">
+    <div class="chcard"><h4><i class="ti ti-chart-bar"></i> Số khách duy nhất đã chăm sóc (30 ngày)</h4><div class="chwrap" style="height:210px"><canvas id="chMemberBar"></canvas></div></div>
+    <div class="chcard"><h4><i class="ti ti-trending-up"></i> Xu hướng theo tuần (6 tuần gần nhất)</h4><div class="chwrap" style="height:210px"><canvas id="chMemberTrend"></canvas></div></div>
+  </div>
+  <div style="font-size:11px;color:var(--text3);margin-top:-8px;margin-bottom:16px;font-style:italic">* Cả 2 biểu đồ tính theo tài khoản đăng nhập thực hiện thao tác — đúng bản chất vì cả team nhắn linh hoạt giữa các ID, không gán cố định ai quản ID nào. Đường xu hướng đi xuống liên tục ở ai đó là dấu hiệu đáng chú ý (có thể đang quá tải việc khác, hoặc đang lơ là).</div>`;
 
   h+=`<div class="chgrid">
     <div class="chcard"><h4><i class="ti ti-target"></i> Tỷ lệ đúng hạn theo ID</h4><div class="tc"><table><thead><tr><th>ID</th><th>KH</th><th>Quá hạn</th><th>Đúng hạn</th></tr></thead><tbody>`;
@@ -747,7 +759,7 @@ function rReport(){
   h+=`</tbody></table></div><div style="font-size:11px;color:var(--text3);margin-top:6px;font-style:italic">* Điền "Nguồn khách hàng" khi thêm/sửa để phân tích nguồn nào ra khách chất lượng.</div></div>
   </div>`;
   document.getElementById('MC').innerHTML=h;
-  drawMemberChart(all);
+  drawMemberChart(perM, wkTrend, weekLabs);
 }
 
 // ── PHỄU KANBAN ──
@@ -974,26 +986,26 @@ function drawCharts(all){
   chWeek=new Chart(we,{type:'bar',data:{labels:labs,datasets:[{label:'Khách được nhắn',data:buckets,backgroundColor:'#185FA5',borderRadius:5}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
 }
 
-// ── BIỂU ĐỒ HIỆU SUẤT THEO THÀNH VIÊN (đã chăm sóc / còn tồn đọng) ──
-function drawMemberChart(all){
+// ── BIỂU ĐỒ HIỆU SUẤT THEO THÀNH VIÊN (khách duy nhất đã chăm sóc + xu hướng tuần) ──
+function drawMemberChart(perM, wkTrend, weekLabs){
   const dark=document.body.classList.contains('dark');
   const grid=dark?'rgba(255,255,255,.08)':'rgba(0,0,0,.06)';
   const txt=dark?'#AEB6C2':'#5A5A5A';
   if(chMember){chMember.destroy();chMember=null;}
-  const el=document.getElementById('chMember');
-  if(!el||!window.Chart) return;
+  if(chMemberTrend){chMemberTrend.destroy();chMemberTrend=null;}
+  const barEl=document.getElementById('chMemberBar');
+  const trendEl=document.getElementById('chMemberTrend');
+  if(!window.Chart) return;
   const labels=USERS.map(u=>u.name);
-  const done=[], pending=[];
-  USERS.forEach(u=>{
-    const scope=allowedIDsFor(u);
-    const own=scope===IDS?all:all.filter(c=>scope.includes(c.idNhom));
-    done.push(own.filter(c=>c.ngay&&!needMsg(c)).length);
-    pending.push(own.filter(c=>needMsg(c)).length);
-  });
-  chMember=new Chart(el,{type:'bar',data:{labels,datasets:[
-    {label:'Đã chăm sóc (còn hạn)',data:done,backgroundColor:'#2D6A2D',borderRadius:5},
-    {label:'Còn tồn đọng (cần nhắn)',data:pending,backgroundColor:'#C62828',borderRadius:5}
-  ]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:txt,font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:12,weight:'600'}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
+  const colors=USERS.map(u=>u.color);
+  if(barEl){
+    const data=USERS.map(u=>perM[u.name]?perM[u.name].custSet.size:0);
+    chMember=new Chart(barEl,{type:'bar',data:{labels,datasets:[{label:'Khách duy nhất',data,backgroundColor:colors,borderRadius:6}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:12,weight:'600'}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
+  }
+  if(trendEl){
+    const datasets=USERS.map(u=>({label:u.name,data:(wkTrend[u.name]||[]).map(s=>s.size),borderColor:u.color,backgroundColor:u.color,tension:.3,fill:false,pointRadius:3}));
+    chMemberTrend=new Chart(trendEl,{type:'line',data:{labels:weekLabs,datasets},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{color:txt,font:{size:11},boxWidth:12}}},scales:{x:{grid:{display:false},ticks:{color:txt,font:{size:10}}},y:{grid:{color:grid},ticks:{color:txt,precision:0,font:{size:10}},beginAtZero:true}}}});
+  }
 }
 
 // ── BUILD ROWS ──
@@ -1130,7 +1142,7 @@ function doMsg(key,name,id){
   const t=todayS();
   if(DB) update(ref(DB,'customers/'+key),{ngay:t,nhacNgay:''});  // nhắn xong -> xoá lịch hẹn riêng
   if(C[key]) C[key]={...C[key],ngay:t,nhacNgay:''};
-  addLog('update','Đã nhắn: '+name+' ('+id+') — '+t);
+  addLog('update','Đã nhắn: '+name+' ('+id+') — '+t,key);
   showToast('Đã cập nhật: '+name,'ok');
   updateNav(); refresh();
 }
@@ -1256,7 +1268,7 @@ function saveSP(key){
   const upd={ghiChu:note,noteHist:hist,ngay:t,nhacNgay:''}; // ghi nhật ký = đã liên hệ hôm nay
   if(DB) update(ref(DB,'customers/'+key),upd);
   C[key]={...c,...upd};
-  addLog('note',(ITYPES[selIType]||ITYPES.other).t+' '+(c.hoTen||'')+': '+note);
+  addLog('note',(ITYPES[selIType]||ITYPES.other).t+' '+(c.hoTen||'')+': '+note,key);
   showToast('Đã lưu nhật ký ('+(ITYPES[selIType]||ITYPES.other).t+')','ok');
   closeSP(); updateNav(); refresh();
 }
