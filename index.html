@@ -134,6 +134,9 @@ tr:hover td{background:var(--th)}
 .t-dia{background:#F3E5F5;color:#6A1B9A;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid #AB47BC;font-weight:600;display:inline-flex;align-items:center;gap:3px}
 .t-gold{background:#FFF8E1;color:#E65100;font-size:11px;padding:2px 8px;border-radius:20px;border:1px solid #FFB300;font-weight:600;display:inline-flex;align-items:center;gap:3px}
 .t-thu{background:#F0F0EE;color:#777;font-size:11px;padding:2px 8px;border-radius:20px;font-weight:500;display:inline-flex;align-items:center;gap:3px}
+.t-vip.tb-glow{box-shadow:0 0 0 3px rgba(255,109,0,.14)}
+.t-dia.tb-glow{box-shadow:0 0 0 3px rgba(171,71,188,.14)}
+.t-gold.tb-glow{box-shadow:0 0 0 3px rgba(255,179,0,.16)}
 .id-c{background:var(--gray);color:var(--text2);font-size:11px;padding:2px 7px;border-radius:20px;border:1px solid var(--border)}
 .av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0;background:var(--blue-light);color:var(--blue)}
 .av.vav{background:#FFF8E1;color:#E65100}
@@ -526,7 +529,7 @@ let tierFixed=false;
 let advTier='', advID='', advStat='';
 let chTier=null, chWeek=null, chMember=null, chMemberTrend=null;
 let kanID='';
-let viewMode=localStorage.getItem('viewMode')||'list';
+let viewMode=localStorage.getItem('viewMode')||'card';
 let reportRange='all'; // '7' | '30' | 'all' — khoảng thời gian cho biểu đồ hiệu suất member
 // Các giai đoạn phễu bán hàng
 const STAGES=[
@@ -932,7 +935,16 @@ function rSimple(list, type){
   let adv='';
   if(type==='all'){
     show=applyAdv(list);
-    adv=`<div class="advbar">
+    const kpiV=list.reduce((s,c)=>s+(c.von||0),0);
+    const kpiVip=list.filter(c=>c.vip==='vip').length;
+    const kpiUrg=list.filter(c=>needMsg(c)).length;
+    const kpi=`<div class="stats">
+      <div class="stat"><div class="stat-l"><i class="ti ti-users" style="font-size:12px"></i>Tổng khách</div><div class="stat-v">${list.length}</div></div>
+      <div class="stat"><div class="stat-l" style="color:var(--green)"><i class="ti ti-currency-dong" style="font-size:12px"></i>Tổng vốn</div><div class="stat-v" style="font-size:18px;color:var(--green)">${(kpiV/1e9).toFixed(1)}B</div></div>
+      <div class="stat"><div class="stat-l" style="color:var(--amber)"><i class="ti ti-bell" style="font-size:12px"></i>Cần nhắc hôm nay</div><div class="stat-v" style="color:var(--amber)">${kpiUrg}</div></div>
+      <div class="stat"><div class="stat-l" style="color:#BF360C"><i class="ti ti-crown" style="font-size:12px"></i>Khách VIP</div><div class="stat-v" style="color:#BF360C">${kpiVip}</div></div>
+    </div>`;
+    adv=kpi+`<div class="advbar">
       <label>Lọc nâng cao:</label>
       <select onchange="setAdv('tier',this.value)">
         <option value="">— Hạng —</option>
@@ -1172,14 +1184,17 @@ function buildCards(list){
     const hn=c.hoTen?c.hoTen.replace(/'/g,"\\'"):'';
     const ini=c.hoTen?c.hoTen.split(' ').slice(-2).map(w=>w[0]).join('').toUpperCase():'?';
     const tierCls=c.vip==='vip'?'t-v':c.vip==='diamond'?'t-d':c.vip==='gold'?'t-g':'';
-    const tb=c.vip==='vip'?'<span class="t-vip"><i class="ti ti-crown" style="font-size:9px"></i>VIP</span>':
-      c.vip==='diamond'?'<span class="t-dia"><i class="ti ti-diamond" style="font-size:9px"></i>Diamond</span>':
-      c.vip==='gold'?'<span class="t-gold"><i class="ti ti-medal" style="font-size:9px"></i>Gold</span>':
+    const tb=c.vip==='vip'?'<span class="t-vip tb-glow"><i class="ti ti-crown" style="font-size:9px"></i>VIP</span>':
+      c.vip==='diamond'?'<span class="t-dia tb-glow"><i class="ti ti-diamond" style="font-size:9px"></i>Diamond</span>':
+      c.vip==='gold'?'<span class="t-gold tb-glow"><i class="ti ti-medal" style="font-size:9px"></i>Gold</span>':
       '<span class="t-thu">Thường</span>';
     const note=c.ghiChu||'';
     const noteEsc=note.replace(/"/g,'&quot;');
     const sd=(c.sdt||'').replace(/[^\d+]/g,'');
-    const st=statusHtml(c);
+    const lim=tLimit(c.vip||'none'), dEl=dDays(c.ngay);
+    const pct=c.ngay?Math.max(4,Math.min(100,Math.round(dEl/lim*100))):0;
+    const barCol=!c.ngay?'var(--border)':isOverdue(c)?'var(--red)':isSoonDue(c)?'var(--amber)':'var(--green)';
+    const barLbl=!c.ngay?'Chưa nhắn':isOverdue(c)?`Quá hạn ${Math.abs(daysLeft(c))}n · ${dEl}/${lim}n`:`${dEl}/${lim} ngày`;
     const rem=c.nhacNgay?`<div style="font-size:10px;color:${reminderDue(c)?'#C62828':'var(--text3)'}">⏰ Hẹn ${c.nhacNgay}</div>`:'';
     // Mini sparkline: 8 khung 5-ngày gần nhất, đếm số lần ghi nhật ký tương tác
     const hist=Array.isArray(c.noteHist)?c.noteHist:[];
@@ -1202,10 +1217,13 @@ function buildCards(list){
           <div class="cc-meta"><span class="id-c">${id}</span>${tb}</div>
         </div>
       </div>
-      <div class="cc-row"><span class="cc-von">${c.von?Math.round(c.von).toLocaleString('vi-VN')+'đ':'—'}</span><span>${c.ngay||'Chưa nhắn'}</span></div>
+      <div class="cc-row"><span class="cc-von">${c.von?Math.round(c.von).toLocaleString('vi-VN')+'đ':'—'}</span>${c.sdt?`<a href="tel:${sd}" style="color:var(--text2);text-decoration:none;font-size:11px"><i class="ti ti-phone" style="font-size:10px"></i> ${c.sdt}</a>`:'<span style="font-size:11px;color:var(--text3)">— SĐT</span>'}</div>
       <div class="cc-row" style="align-items:flex-end">
         <div class="cc-spark" title="Tần suất chăm sóc gần đây (mỗi cột = 5 ngày)">${spark}</div>
-        <div>${st}</div>
+        <div style="flex:1;min-width:0;margin-left:8px">
+          <div class="pb"><div class="pf" style="width:${pct}%;background:${barCol}"></div></div>
+          <div style="font-size:10px;color:${isOverdue(c)?'var(--red)':'var(--text3)'};margin-top:3px;text-align:right">${barLbl}</div>
+        </div>
       </div>
       ${rem}
       ${note?`<div class="cc-note" onclick="openSP('${key}')" title="${noteEsc}">📝 ${note}</div>`:''}
