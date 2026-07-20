@@ -66,7 +66,8 @@ body.dark .app::before{
 .nb i{font-size:15px;flex-shrink:0}
 
 /* RAIL */
-.rail{width:64px;flex-shrink:0;background:rgba(7,11,20,.48);backdrop-filter:blur(30px) saturate(200%);-webkit-backdrop-filter:blur(30px) saturate(200%);border-right:1px solid rgba(0,229,255,.4);box-shadow:1px 0 0 rgba(0,229,255,.25),0 0 32px 2px rgba(0,229,255,.18);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;transition:transform .25s}
+.rail{position:relative;width:64px;flex-shrink:0;background:linear-gradient(180deg,rgba(0,229,255,.22),rgba(7,11,20,.5) 40%,rgba(7,11,20,.58));backdrop-filter:blur(30px) saturate(200%);-webkit-backdrop-filter:blur(30px) saturate(200%);border-right:1.5px solid rgba(0,229,255,.55);box-shadow:2px 0 0 rgba(0,229,255,.3),0 0 40px 6px rgba(0,229,255,.28);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;transition:transform .25s}
+.rail::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.9),transparent)}
 .rail-logo{width:36px;height:36px;border-radius:12px;background:rgba(0,229,255,.12);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
 .rail-nav{display:flex;flex-direction:column;gap:4px;flex:1}
 .rail-foot{display:flex;flex-direction:column;gap:4px}
@@ -97,7 +98,9 @@ body.dark .app::before{
 
 /* WORKZONE / CMDBAR */
 .workzone{flex:1;display:flex;flex-direction:column;overflow:hidden}
-.cmdbar{background:var(--glass);backdrop-filter:blur(34px) saturate(200%);-webkit-backdrop-filter:blur(34px) saturate(200%);border-bottom:1px solid rgba(0,229,255,.4);padding:12px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 0 rgba(0,229,255,.25),0 12px 28px -6px rgba(0,229,255,.1)}
+.cmdbar{position:relative;background:linear-gradient(180deg,rgba(0,229,255,.14),var(--glass));backdrop-filter:blur(34px) saturate(200%);-webkit-backdrop-filter:blur(34px) saturate(200%);border-bottom:1.5px solid rgba(0,229,255,.55);padding:12px 20px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 0 rgba(0,229,255,.3),0 16px 32px -8px rgba(0,229,255,.16)}
+.cmdbar::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.9),transparent)}
+body.dark .cmdbar::before{background:linear-gradient(90deg,transparent,rgba(0,229,255,.7),transparent)}
 .hamb{display:none;background:none;border:1px solid var(--border);border-radius:8px;color:var(--text2);font-size:18px;padding:4px 9px;cursor:pointer}
 .cmd-logo{font-family:var(--serif);font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:6px;white-space:nowrap}
 .tb-t{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:-.01em;color:var(--text)}
