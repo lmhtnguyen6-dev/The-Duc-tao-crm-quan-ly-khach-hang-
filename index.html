@@ -45,18 +45,14 @@ body.dark{
 }
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 .app{display:flex;height:100vh;overflow:hidden;position:relative}
-.app::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+.app::before{content:'';position:fixed;top:0;left:0;right:0;height:260px;z-index:0;pointer-events:none;
   background:
-    radial-gradient(620px 460px at 6% 0%,rgba(0,229,255,.16),transparent 52%),
-    radial-gradient(560px 440px at 94% 12%,rgba(139,92,246,.32),transparent 58%),
-    radial-gradient(680px 520px at 28% 105%,rgba(0,229,255,.26),transparent 58%),
-    radial-gradient(420px 340px at 60% 40%,rgba(0,229,255,.14),transparent 60%)}
+    radial-gradient(620px 300px at 6% 0%,rgba(0,229,255,.16),transparent 60%),
+    radial-gradient(560px 300px at 94% 0%,rgba(139,92,246,.3),transparent 62%)}
 body.dark .app::before{
   background:
-    radial-gradient(620px 460px at 6% 0%,rgba(0,229,255,.2),transparent 52%),
-    radial-gradient(560px 440px at 94% 12%,rgba(139,92,246,.4),transparent 58%),
-    radial-gradient(680px 520px at 28% 105%,rgba(0,229,255,.32),transparent 58%),
-    radial-gradient(420px 340px at 60% 40%,rgba(0,229,255,.2),transparent 60%)}
+    radial-gradient(620px 300px at 6% 0%,rgba(0,229,255,.2),transparent 60%),
+    radial-gradient(560px 300px at 94% 0%,rgba(139,92,246,.38),transparent 62%)}
 .rail,.workzone{position:relative;z-index:2}
 
 /* NAV BUTTON BASE (reused by rail, pillnav, id-nav) */
@@ -115,7 +111,7 @@ body.dark .cmdbar::before{background:linear-gradient(90deg,transparent,rgba(0,22
 .ic-btn:hover{border-color:var(--blue);background:var(--card)}
 
 /* COLUMNS */
-.cols{flex:1;display:grid;grid-template-columns:260px 1fr 300px;overflow:hidden}
+.cols{flex:1;display:grid;grid-template-columns:260px 1fr 300px;overflow:hidden;background:var(--bg)}
 .col-left,.col-right{overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px}
 .col-left{border-right:1px solid var(--border)}
 .col-right{border-left:1px solid var(--border)}
@@ -127,6 +123,14 @@ body.dark .cmdbar::before{background:linear-gradient(90deg,transparent,rgba(0,22
 .pillnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .pillnav .nb{width:auto;flex-direction:row;border-radius:9999px;padding:7px 12px;background:var(--card);border:1px solid var(--border);position:static}
 .pillnav .nb.on{background:var(--navy);color:#fff}
+.pillnav.compact{margin-bottom:0;gap:4px}
+.pillnav.compact .nb{padding:4px 9px;font-size:11px;gap:4px}
+.pillnav.compact .nb i{font-size:12px}
+.pillnav.compact .badge{font-size:9px;padding:1px 5px}
+.quicktabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.quicktabs .nb{width:auto;flex-direction:row;border-radius:9999px;padding:8px 14px;background:var(--card);border:1px solid var(--border);position:static;font-weight:600}
+.quicktabs .nb.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+body.dark .quicktabs .nb.on{background:var(--blue-dark);color:#08121f;border-color:var(--blue-dark)}
 .statusbar{padding:7px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .sb-grp{display:flex;align-items:center;gap:4px;white-space:nowrap}
 .sb-sep{opacity:.4}
@@ -458,17 +462,19 @@ body.dark .toast.warn{color:#241a02}
 
       <main class="col-mid">
         <div class="page-head"><div class="tb-t" id="ptitle">Dashboard</div></div>
-        <div class="pillnav">
-          <button class="nb" onclick="gP('all')">Tất cả khách<span class="badge b-blue" id="b-all">0</span></button>
-          <button class="nb" onclick="gP('urg')"><i class="ti ti-bell"></i>Cần nhắn ngay<span class="badge b-red" id="b-urg">0</span></button>
-          <button class="nb" onclick="gP('vip')"><i class="ti ti-crown" style="color:#FF6D00"></i>VIP<span class="badge b-orange" id="b-vip">0</span></button>
-          <button class="nb" onclick="gP('dia')"><i class="ti ti-diamond" style="color:#AB47BC"></i>Diamond<span class="badge b-purple" id="b-dia">0</span></button>
-          <button class="nb" onclick="gP('gold')"><i class="ti ti-medal" style="color:#FFB300"></i>Gold<span class="badge b-gold" id="b-gold">0</span></button>
-          <button class="nb" onclick="gP('thu')"><i class="ti ti-user" style="color:#999"></i>Thường<span class="badge b-gray" id="b-thu">0</span></button>
-        </div>
-        <div class="pillnav" id="id-nav"></div>
-        <div style="margin:0 0 10px">
-          <button class="nb" style="border:1px dashed var(--border);display:inline-flex;color:var(--text3);font-size:12px" onclick="openAddID()"><i class="ti ti-plus"></i>Thêm ID mới</button>
+        <div id="topnav-wrap">
+          <div class="pillnav">
+            <button class="nb" onclick="gP('all')">Tất cả khách<span class="badge b-blue" id="b-all">0</span></button>
+            <button class="nb" onclick="gP('urg')"><i class="ti ti-bell"></i>Cần nhắn ngay<span class="badge b-red" id="b-urg">0</span></button>
+            <button class="nb" onclick="gP('vip')"><i class="ti ti-crown" style="color:#FF6D00"></i>VIP<span class="badge b-orange" id="b-vip">0</span></button>
+            <button class="nb" onclick="gP('dia')"><i class="ti ti-diamond" style="color:#AB47BC"></i>Diamond<span class="badge b-purple" id="b-dia">0</span></button>
+            <button class="nb" onclick="gP('gold')"><i class="ti ti-medal" style="color:#FFB300"></i>Gold<span class="badge b-gold" id="b-gold">0</span></button>
+            <button class="nb" onclick="gP('thu')"><i class="ti ti-user" style="color:#999"></i>Thường<span class="badge b-gray" id="b-thu">0</span></button>
+          </div>
+          <div class="pillnav" id="id-nav"></div>
+          <div style="margin:0 0 10px">
+            <button class="nb" style="border:1px dashed var(--border);display:inline-flex;color:var(--text3);font-size:12px" onclick="openAddID()"><i class="ti ti-plus"></i>Thêm ID mới</button>
+          </div>
         </div>
         <div class="mc" id="MC"><div style="padding:40px;text-align:center;color:var(--text3)"><div class="sp" style="margin:0 auto 10px"></div>Đang tải...</div></div>
       </main>
@@ -786,7 +792,16 @@ function updateNav(){
   document.getElementById('b-dia').textContent=all.filter(c=>c.vip==='diamond').length;
   document.getElementById('b-gold').textContent=all.filter(c=>c.vip==='gold').length;
   document.getElementById('b-thu').textContent=all.filter(c=>!c.vip||c.vip==='none').length;
-  document.getElementById('id-nav').innerHTML=visibleIDs().map((id,i)=>{
+  syncTopnav();
+}
+const HIDE_TOPNAV_PAGES=['all','dash','log','report'];
+function syncTopnav(){
+  const hide=HIDE_TOPNAV_PAGES.includes(pg);
+  document.getElementById('topnav-wrap').style.display=hide?'none':'';
+  document.getElementById('id-nav').innerHTML=hide?'':idNavHtml(getAll());
+}
+function idNavHtml(all){
+  return visibleIDs().map((id,i)=>{
     const ks=all.filter(c=>c.idNhom===id);
     const u=ks.filter(c=>needMsg(c)).length;
     return`<button class="nb" onclick="gID('${id}')" id="n${id}">
@@ -802,12 +817,14 @@ function gP(p){
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
   const titles={all:'Tất cả khách hàng',dash:'Dashboard',kanban:'Phễu khách hàng (Kanban)',urg:'Cần nhắn ngay',vip:'Khách VIP 👑',dia:'Khách Diamond 💎',gold:'Khách Gold 🥇',thu:'Khách Thường 👤',report:'Báo cáo & hiệu suất',log:'Lịch sử thay đổi'};
   document.getElementById('ptitle').textContent=titles[p]||p;
+  syncTopnav();
   toggleSB(false);
   refresh();
 }
 function gID(id){
   pg='id'; curID=id; curF='all';
   document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  syncTopnav();
   document.getElementById('n'+id)?.classList.add('on');
   document.getElementById('ptitle').textContent='Quản lý — '+id;
   toggleSB(false);
@@ -1001,11 +1018,10 @@ function rKanban(){
   STAGES.forEach(s=>{
     const items=list.filter(c=>getStage(c)===s.k).sort((a,b)=>(b.von||0)-(a.von||0));
     const tot=items.reduce((x,c)=>x+(c.von||0),0);
-    const cap=items.slice(0,60);
     h+=`<div class="kan-col" ondragover="kanOver(event,this)" ondragleave="this.classList.remove('drop')" ondrop="kanDrop(event,'${s.k}',this)">
       <div class="kan-h" style="border-top:3px solid ${s.c}"><span style="color:${s.c}"><i class="ti ${s.i}"></i> ${s.t}</span><span class="kan-cnt">${items.length}</span></div>
       <div class="kan-sub">💰 ${(tot/1e9).toFixed(2)}B</div>
-      <div class="kan-body">${cap.map(c=>kanCard(c)).join('')||'<div class="kan-empty">Kéo thẻ vào đây</div>'}${items.length>60?`<div class="kan-more">+${items.length-60} khách nữa…</div>`:''}</div>
+      <div class="kan-body">${items.map(c=>kanCard(c)).join('')||'<div class="kan-empty">Kéo thẻ vào đây</div>'}</div>
     </div>`;
   });
   h+=`</div>`;
@@ -1035,8 +1051,14 @@ function applyAdv(list){
   if(advStat==='urg') r=r.filter(c=>needMsg(c));
   else if(advStat==='ok') r=r.filter(c=>c.ngay&&!needMsg(c));
   else if(advStat==='new') r=r.filter(c=>!c.ngay);
+  else if(advStat==='overdue') r=r.filter(isOverdue);
+  else if(advStat==='soon') r=r.filter(isSoonDue);
   return r;
 }
+window.quickTab=function(tier,stat){
+  advTier=tier; advID=''; advStat=stat;
+  refresh();
+};
 
 // ── RENDER SIMPLE ──
 function rSimple(list, type){
@@ -1055,16 +1077,34 @@ function rSimple(list, type){
     show=applyAdv(list);
     const kpiV=list.reduce((s,c)=>s+(c.von||0),0);
     const kpiVip=list.filter(c=>c.vip==='vip').length;
+    const kpiDia=list.filter(c=>c.vip==='diamond').length;
+    const kpiGold=list.filter(c=>c.vip==='gold').length;
+    const kpiThu=list.filter(c=>!c.vip||c.vip==='none').length;
     const kpiUrg=list.filter(c=>needMsg(c)).length;
     const kpiSpark=`<div class="cc-spark stat-spark">${sparkBars(weekBuckets(list))}</div>`;
+    const isAllTab=!advTier&&!advStat, isVipCallTab=advTier==='vip'&&advStat==='urg', isOverdueTab=!advTier&&advStat==='overdue', isSoonTab=!advTier&&advStat==='soon';
+    const quickTabs=`<div class="quicktabs">
+      <button class="nb${isAllTab?' on':''}" onclick="quickTab('','')">Tất cả</button>
+      <button class="nb${isVipCallTab?' on':''}" onclick="quickTab('vip','urg')"><i class="ti ti-crown" style="color:#FF6D00"></i>VIP cần gọi</button>
+      <button class="nb${isOverdueTab?' on':''}" onclick="quickTab('','overdue')"><i class="ti ti-alert-circle"></i>Quá hạn</button>
+      <button class="nb${isSoonTab?' on':''}" onclick="quickTab('','soon')"><i class="ti ti-clock"></i>Sắp đến hạn</button>
+    </div>`;
     const kpi=`<div class="stats kpi-hero">
       <div class="stat"><div class="stat-ic" style="background:rgba(0,229,255,.14);color:var(--blue)"><i class="ti ti-users"></i></div><div class="stat-l"><i class="ti ti-users" style="font-size:12px"></i>Tổng khách</div><div class="stat-v">${list.length}</div>${kpiSpark}</div>
       <div class="stat"><div class="stat-ic" style="background:rgba(45,106,45,.14);color:var(--green)"><i class="ti ti-chart-bar"></i></div><div class="stat-l" style="color:var(--green)"><i class="ti ti-currency-dong" style="font-size:12px"></i>Tổng vốn</div><div class="stat-v" style="font-size:18px;color:var(--green)">${(kpiV/1e9).toFixed(1)}B</div>${kpiSpark}</div>
       <div class="stat"><div class="stat-ic" style="background:rgba(139,96,0,.14);color:var(--amber)"><i class="ti ti-bell"></i></div><div class="stat-l" style="color:var(--amber)"><i class="ti ti-bell" style="font-size:12px"></i>Cần nhắc hôm nay</div><div class="stat-v" style="color:var(--amber)">${kpiUrg}</div>${kpiSpark}</div>
       <div class="stat"><div class="stat-ic" style="background:rgba(191,54,12,.14);color:#BF360C"><i class="ti ti-diamond"></i></div><div class="stat-l" style="color:#BF360C"><i class="ti ti-crown" style="font-size:12px"></i>Khách VIP</div><div class="stat-v" style="color:#BF360C">${kpiVip}</div>${kpiSpark}</div>
     </div>`;
+    const compactNav=`<div class="pillnav compact">
+      <button class="nb" onclick="gP('all')">Tất cả khách<span class="badge b-blue">${list.length}</span></button>
+      <button class="nb" onclick="gP('urg')"><i class="ti ti-bell"></i>Cần nhắn ngay<span class="badge b-red">${kpiUrg}</span></button>
+      <button class="nb" onclick="gP('vip')"><i class="ti ti-crown" style="color:#FF6D00"></i>VIP<span class="badge b-orange">${kpiVip}</span></button>
+      <button class="nb" onclick="gP('dia')"><i class="ti ti-diamond" style="color:#AB47BC"></i>Diamond<span class="badge b-purple">${kpiDia}</span></button>
+      <button class="nb" onclick="gP('gold')"><i class="ti ti-medal" style="color:#FFB300"></i>Gold<span class="badge b-gold">${kpiGold}</span></button>
+      <button class="nb" onclick="gP('thu')"><i class="ti ti-user" style="color:#999"></i>Thường<span class="badge b-gray">${kpiThu}</span></button>
+    </div><div class="pillnav compact">${idNavHtml(list)}<button class="nb" style="border:1px dashed var(--border);color:var(--text3);font-size:11px;padding:4px 9px" onclick="openAddID()"><i class="ti ti-plus"></i>Thêm ID</button></div>`;
     const advCount=[advTier,advID,advStat].filter(Boolean).length;
-    adv=kpi+`<div class="advbar">
+    adv=quickTabs+kpi+`<div class="advbar">
       <div class="filter-menu">
         <button class="filter-trig${advCount?' active':''}" onclick="toggleFilterPop()"><i class="ti ti-filter"></i> Bộ lọc${advCount?`<span class="badge b-blue">${advCount}</span>`:''}</button>
         <div class="filter-pop" id="filter-pop">
@@ -1087,13 +1127,16 @@ function rSimple(list, type){
             <option value="urg"${advStat==='urg'?' selected':''}>Cần nhắn ngay</option>
             <option value="ok"${advStat==='ok'?' selected':''}>Còn hạn</option>
             <option value="new"${advStat==='new'?' selected':''}>Chưa nhắn</option>
+            <option value="overdue"${advStat==='overdue'?' selected':''}>Đã quá hạn</option>
+            <option value="soon"${advStat==='soon'?' selected':''}>Sắp quá hạn</option>
           </select>
           ${advCount?`<button class="fb" onclick="setAdv('tier','');setAdv('id','');setAdv('stat','')">Xóa lọc</button>`:''}
         </div>
       </div>
       <span style="font-size:11px;color:var(--text3)">${show.length} khách</span>
       <span style="margin-left:auto">${viewToggleHtml()}</span>
-    </div>`;
+    </div>
+    <div style="margin-bottom:14px">${compactNav}</div>`;
     document.getElementById('MC').innerHTML=adv+buildList(show);
     return;
   }
@@ -1177,7 +1220,7 @@ function rDash(){
     const tc=localStorage.getItem('cf_'+todayS());
     if(!tc) h+=`<div class="cb"><div style="font-size:20px">📋</div><div class="cb-i"><div class="cb-t">Còn ${urg.length} khách cần nhắn hôm nay</div><div class="cb-s">Nhắn xong tất cả → xác nhận</div></div><button class="btn-cf" onclick="cfAll()">✓ Xác nhận đã nhắn hết</button></div>`;
     else h+=`<div class="cb done"><div>✅</div><div class="cb-i"><div class="cb-t done">Đã hoàn thành nhắn tin hôm nay!</div><div class="cb-s">Xác nhận lúc ${tc}</div></div></div>`;
-    h+=`<div style="font-family:var(--serif);font-size:14px;font-weight:700;margin-bottom:10px;color:var(--amber)"><i class="ti ti-alert-circle"></i> Cần nhắn hôm nay(${urg.length})</div><div class="tc" style="margin-bottom:16px">${buildRows(urg.slice(0,8))}</div>`;
+    h+=`<div style="font-family:var(--serif);font-size:14px;font-weight:700;margin-bottom:10px;color:var(--amber)"><i class="ti ti-alert-circle"></i> Cần nhắn hôm nay(${urg.length})</div><div class="tc" style="margin-bottom:16px;max-height:420px;overflow-y:auto">${buildRows(urg)}</div>`;
   }
   h+=`<div style="font-family:var(--serif);font-size:14px;font-weight:700;margin-bottom:10px">Tình trạng từng ID</div><div class="ig">`;
   visibleIDs().forEach((id,i)=>{
