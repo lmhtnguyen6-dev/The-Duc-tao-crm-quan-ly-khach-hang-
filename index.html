@@ -40,24 +40,24 @@ body.dark{
   --amber:#E0B24A;--amber-light:#2E2611;
   --red:#E57373;--red-light:#341818;--border:#22304A;
   --text:#EAF6FF;--text2:#94A3B8;--text3:#5B6B84;
-  --gray:#16213A;--card:#111A2C;--bg:#0B1220;--th:#16213A;--rowline:#1B2740;
+  --gray:#16213A;--card:#111A2C;--bg:#0A0A0F;--th:#16213A;--rowline:#1B2740;
   --glass:rgba(17,26,44,.4);--shadow-glass:0 8px 30px rgba(0,0,0,.35);--glow-cyan:0 0 0 3px rgba(0,229,255,.22);
 }
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
 .app{display:flex;height:100vh;overflow:hidden;position:relative}
 .app::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(620px 460px at 6% 0%,rgba(0,229,255,.42),transparent 58%),
+    radial-gradient(620px 460px at 6% 0%,rgba(0,229,255,.16),transparent 52%),
     radial-gradient(560px 440px at 94% 12%,rgba(139,92,246,.32),transparent 58%),
     radial-gradient(680px 520px at 28% 105%,rgba(0,229,255,.26),transparent 58%),
     radial-gradient(420px 340px at 60% 40%,rgba(0,229,255,.14),transparent 60%)}
 body.dark .app::before{
   background:
-    radial-gradient(620px 460px at 6% 0%,rgba(0,229,255,.5),transparent 58%),
+    radial-gradient(620px 460px at 6% 0%,rgba(0,229,255,.2),transparent 52%),
     radial-gradient(560px 440px at 94% 12%,rgba(139,92,246,.4),transparent 58%),
     radial-gradient(680px 520px at 28% 105%,rgba(0,229,255,.32),transparent 58%),
     radial-gradient(420px 340px at 60% 40%,rgba(0,229,255,.2),transparent 60%)}
-.rail,.workzone{position:relative;z-index:1}
+.rail,.workzone{position:relative;z-index:2}
 
 /* NAV BUTTON BASE (reused by rail, pillnav, id-nav) */
 .nb{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text2);margin-bottom:1px;border:none;background:none;text-align:left;font-family:var(--sans);font-weight:500;transition:background .15s,color .15s}
@@ -69,7 +69,7 @@ body.dark .app::before{
 .rail{position:relative;width:64px;flex-shrink:0;background:linear-gradient(180deg,rgba(0,229,255,.22),rgba(7,11,20,.5) 40%,rgba(7,11,20,.58));backdrop-filter:blur(30px) saturate(200%);-webkit-backdrop-filter:blur(30px) saturate(200%);border-right:1.5px solid rgba(0,229,255,.55);box-shadow:2px 0 0 rgba(0,229,255,.3),0 0 40px 6px rgba(0,229,255,.28);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px;transition:transform .25s}
 .rail::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(0,229,255,.9),transparent)}
 .rail-logo{width:36px;height:36px;border-radius:12px;background:rgba(0,229,255,.12);color:var(--blue);display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
-.rail-nav{display:flex;flex-direction:column;gap:4px;flex:1}
+.rail-nav{display:flex;flex-direction:column;gap:4px;flex:1;justify-content:space-evenly}
 .rail-foot{display:flex;flex-direction:column;gap:4px}
 .rb{position:relative;width:40px;height:40px;border-radius:12px;border:none;background:none;color:rgba(255,255,255,.5);font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .rb:hover{background:rgba(255,255,255,.08);color:#fff}
@@ -235,8 +235,8 @@ body.dark .cc-spark b.hi{background:var(--blue)}
 .cc-msg{background:var(--green-light);border:1px solid #4CAF50;color:var(--green);border-radius:10px;padding:7px 0;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--sans);transition:filter .15s}
 .cc-msg:hover{filter:brightness(0.96)}
 .cc-acts{display:flex;gap:5px;border-top:1px solid var(--rowline);padding-top:8px;margin-top:2px}
-.cc-ab{flex:1;background:none;border:1px solid var(--border);border-radius:10px;padding:5px 0;font-size:12px;cursor:pointer;color:var(--text2);text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px;transition:background .15s,border-color .15s}
-.cc-ab:hover{background:var(--gray);border-color:var(--blue)}
+.cc-ab{flex:1;background:var(--gray);border:1px solid var(--border);border-radius:10px;padding:8px 0;font-size:16px;cursor:pointer;color:var(--text2);text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px;transition:background .15s,border-color .15s,color .15s}
+.cc-ab:hover{background:rgba(0,229,255,.14);border-color:var(--blue);color:var(--blue)}
 .cc-tier-sel{border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text2);font-family:var(--sans);font-size:11px;padding:5px 4px;width:100%}
 
 /* KANBAN */
@@ -410,9 +410,6 @@ body.dark .sp-sv{background:var(--blue-dark);color:#08121f}
       <button class="nb rb" onclick="gP('report')" title="Báo cáo & hiệu suất"><i class="ti ti-report-analytics"></i></button>
       <button class="nb rb" onclick="gP('log')" title="Lịch sử thay đổi"><i class="ti ti-history"></i></button>
     </nav>
-    <div class="rail-foot">
-      <button class="rb" id="theme-btn" onclick="toggleTheme()" title="Đổi giao diện"><i class="ti ti-moon"></i></button>
-    </div>
   </aside>
 
   <div class="workzone">
@@ -423,6 +420,7 @@ body.dark .sp-sv{background:var(--blue-dark);color:#08121f}
       <button class="btn-add" onclick="openModal()"><i class="ti ti-plus"></i><span class="hide-sm">Thêm khách hàng</span></button>
       <button class="ic-btn" onclick="openImport()" title="Nhập Excel"><i class="ti ti-upload"></i><span class="hide-sm">Nhập</span></button>
       <button class="ic-btn" onclick="doExport()" title="Xuất Excel"><i class="ti ti-file-spreadsheet"></i><span class="hide-sm">Xuất</span></button>
+      <button class="ic-btn" id="theme-btn" onclick="toggleTheme()" title="Đổi giao diện"><i class="ti ti-moon"></i></button>
       <div class="cu-menu">
         <button class="cu-trig" id="cu-bar" style="display:none" onclick="document.getElementById('cu-drop').classList.toggle('on')">
           <div class="cu-av" id="cu-av"></div>
@@ -469,17 +467,13 @@ body.dark .sp-sv{background:var(--blue-dark);color:#08121f}
         </div>
         <div class="colcard">
           <div class="colcard-t"><i class="ti ti-sparkles"></i> AI Assistant</div>
-          <div class="ph-empty">Sẽ hiển thị ở giai đoạn sau</div>
+          <div id="ai-assist"><div class="ph-empty">Đang tải...</div></div>
         </div>
       </aside>
     </div>
 
     <footer class="statusbar">
       <span class="sb-grp"><span class="dot" id="sb-dot"></span><span id="sync-t">Đang kết nối...</span></span>
-      <span class="sb-sep">·</span>
-      <span class="sb-grp"><i class="ti ti-users" style="font-size:12px"></i><span id="sb-total">0</span> khách hàng</span>
-      <span class="sb-sep">·</span>
-      <span class="sb-grp sb-urg" id="sb-urg-wrap"><i class="ti ti-bell" style="font-size:12px"></i><span id="sb-urg">0</span> cần nhắn ngay</span>
       <span class="sb-fill"></span>
       <span class="sb-grp" id="sb-user"></span>
     </footer>
@@ -773,6 +767,7 @@ function updateNav(){
   document.getElementById('b-all').textContent=all.length;
   document.getElementById('b-urg').textContent=getUrg().length;
   updateStatusBar(all);
+  updateAiAssist(all);
   document.getElementById('b-vip').textContent=all.filter(c=>c.vip==='vip').length;
   document.getElementById('b-dia').textContent=all.filter(c=>c.vip==='diamond').length;
   document.getElementById('b-gold').textContent=all.filter(c=>c.vip==='gold').length;
@@ -1406,12 +1401,19 @@ function renderActivityTimeline(){
   }).join('')+(LOGS.length>8?`<span class="tl-more" onclick="gP('log')">Xem tất cả lịch sử →</span>`:'');
 }
 // ── STATUS BAR ──
-function updateStatusBar(all){
+function updateStatusBar(all){}
+// ── AI ASSISTANT ──
+function updateAiAssist(all){
   all=all||getAll();
-  document.getElementById('sb-total').textContent=all.length;
+  const box=document.getElementById('ai-assist');
+  if(!box) return;
   const urg=all.filter(c=>needMsg(c)).length;
-  document.getElementById('sb-urg').textContent=urg;
-  document.getElementById('sb-urg-wrap').classList.toggle('on',urg>0);
+  const vips=all.filter(c=>c.vip==='vip'&&needMsg(c));
+  box.innerHTML=`
+    <div class="sb-grp sb-urg${urg>0?' on':''}" style="margin-bottom:8px"><i class="ti ti-bell" style="font-size:12px"></i> <b>${urg}</b> khách cần chăm sóc</div>
+    ${vips.length?`<div style="font-size:11px;color:var(--text3);margin-bottom:4px">👑 VIP cần chú ý</div>
+      <div style="display:flex;flex-direction:column;gap:4px">${vips.slice(0,6).map(c=>`<div class="li" style="padding:4px 0"><div class="lt" style="cursor:pointer" onclick="openSP('${c._k}')">${c.hoTen||''}</div></div>`).join('')}</div>`
+      :'<div class="ph-empty">Không có VIP cần chú ý</div>'}`;
 }
 
 // ── ACTIONS ──
