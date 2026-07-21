@@ -156,12 +156,20 @@ body.dark .btn-add{background:var(--blue-dark);color:#08121f}
 .fb{padding:5px 12px;border-radius:9999px;border:1px solid var(--border);background:var(--card);font-size:12px;color:var(--text2);cursor:pointer;font-family:var(--sans);font-weight:500}
 .fb.on{background:var(--navy);border-color:var(--navy);color:#fff}
 body.dark .fb.on{background:var(--blue-dark);border-color:var(--blue-dark);color:#08121f}
-.advbar{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.advbar{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;margin-bottom:12px;display:flex;gap:10px;flex-wrap:wrap;align-items:center;box-shadow:var(--shadow-glass)}
+.filter-menu{position:relative}
+.filter-trig{background:var(--gray);color:var(--text2);border:1px solid var(--border);border-radius:9999px;padding:7px 13px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:6px;font-family:var(--sans);font-weight:500;transition:border-color .15s,background .15s}
+.filter-trig:hover{border-color:var(--blue)}
+.filter-trig.active{border-color:var(--blue);color:var(--blue);background:var(--blue-light)}
+.filter-pop{position:absolute;top:calc(100% + 8px);left:0;background:var(--card);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-glass);padding:14px;min-width:230px;display:none;flex-direction:column;gap:10px;z-index:60}
+.filter-pop.on{display:flex}
+.filter-pop label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:-4px}
+.filter-pop select{padding:7px 9px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-family:var(--sans);font-size:12.5px;outline:none}
 .advbar select{padding:6px 9px;border:1px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-family:var(--sans);font-size:12px;outline:none}
 .advbar label{font-size:11px;color:var(--text3);font-weight:600}
 
 /* TABLE */
-.tc{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);overflow-x:auto}
+.tc{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto;box-shadow:var(--shadow-glass)}
 table{width:100%;border-collapse:collapse;font-size:13px}
 th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;color:var(--text3);border-bottom:1px solid var(--border);background:var(--th);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
 td{padding:9px 12px;border-bottom:1px solid var(--rowline);color:var(--text);vertical-align:middle}
@@ -194,20 +202,19 @@ tr:hover td{background:var(--th)}
 .empty{padding:40px;text-align:center;color:var(--text3);font-size:13px;font-style:italic}
 
 /* VIEW TOGGLE */
-.vtg{display:inline-flex;gap:3px;background:var(--gray);border:1px solid var(--border);border-radius:8px;padding:3px}
-.vtb{background:none;border:none;border-radius:6px;padding:5px 9px;font-size:13px;color:var(--text3);cursor:pointer;display:flex;align-items:center}
-.vtb.on{background:var(--card);color:var(--navy);box-shadow:0 1px 2px rgba(0,0,0,.08)}
-body.dark .vtb.on{color:var(--blue)}
+.vtg{display:inline-flex;gap:3px;background:var(--gray);border:1px solid var(--border);border-radius:9999px;padding:3px}
+.vtb{background:none;border:none;border-radius:9999px;padding:5px 10px;font-size:13px;color:var(--text3);cursor:pointer;display:flex;align-items:center;transition:background .15s,color .15s}
+.vtb.on{background:var(--card);color:var(--blue);box-shadow:0 0 0 1px rgba(0,229,255,.35),0 2px 6px rgba(0,229,255,.18)}
 
 /* CUSTOMER CARDS */
-.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:12px}
-.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--rl);padding:13px 14px;display:flex;flex-direction:column;gap:8px}
-.ccard:hover{border-color:#999}
-.cc-top{display:flex;align-items:flex-start;gap:9px}
-.cc-av{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--blue-light);color:var(--blue)}
-.cc-av.t-v{background:#FFF3E0;color:#BF360C}
-.cc-av.t-d{background:#F3E5F5;color:#6A1B9A}
-.cc-av.t-g{background:#FFF8E1;color:#E65100}
+.cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(258px,1fr));gap:14px}
+.ccard{background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:15px 16px;display:flex;flex-direction:column;gap:9px;box-shadow:var(--shadow-glass);transition:transform .18s,box-shadow .18s,border-color .18s}
+.ccard:hover{border-color:rgba(0,229,255,.5);transform:translateY(-3px);box-shadow:0 14px 32px -10px rgba(0,229,255,.28)}
+.cc-top{display:flex;align-items:flex-start;gap:10px}
+.cc-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;background:var(--blue-light);color:var(--blue);box-shadow:0 0 0 3px rgba(0,229,255,.12)}
+.cc-av.t-v{background:#FFF3E0;color:#BF360C;box-shadow:0 0 0 3px rgba(255,109,0,.14)}
+.cc-av.t-d{background:#F3E5F5;color:#6A1B9A;box-shadow:0 0 0 3px rgba(171,71,188,.14)}
+.cc-av.t-g{background:#FFF8E1;color:#E65100;box-shadow:0 0 0 3px rgba(255,179,0,.16)}
 .cc-nm{font-weight:600;font-size:13.5px;cursor:pointer;line-height:1.3}
 .cc-nm:hover{color:var(--blue)}
 .cc-meta{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin-top:3px}
@@ -219,12 +226,12 @@ body.dark .vtb.on{color:var(--blue)}
 body.dark .cc-spark b.hi{background:var(--blue)}
 .cc-note{font-size:11px;color:var(--text3);font-style:italic;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
 .cc-note:hover{color:var(--blue);text-decoration:underline}
-.cc-msg{background:var(--green-light);border:1px solid #4CAF50;color:var(--green);border-radius:7px;padding:6px 0;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--sans)}
+.cc-msg{background:var(--green-light);border:1px solid #4CAF50;color:var(--green);border-radius:10px;padding:7px 0;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--sans);transition:filter .15s}
 .cc-msg:hover{filter:brightness(0.96)}
 .cc-acts{display:flex;gap:5px;border-top:1px solid var(--rowline);padding-top:8px;margin-top:2px}
-.cc-ab{flex:1;background:none;border:1px solid var(--border);border-radius:7px;padding:5px 0;font-size:12px;cursor:pointer;color:var(--text2);text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px}
-.cc-ab:hover{background:var(--gray)}
-.cc-tier-sel{border:1px solid var(--border);border-radius:7px;background:var(--card);color:var(--text2);font-family:var(--sans);font-size:11px;padding:5px 4px;width:100%}
+.cc-ab{flex:1;background:none;border:1px solid var(--border);border-radius:10px;padding:5px 0;font-size:12px;cursor:pointer;color:var(--text2);text-align:center;text-decoration:none;display:flex;align-items:center;justify-content:center;gap:3px;transition:background .15s,border-color .15s}
+.cc-ab:hover{background:var(--gray);border-color:var(--blue)}
+.cc-tier-sel{border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--text2);font-family:var(--sans);font-size:11px;padding:5px 4px;width:100%}
 
 /* KANBAN */
 .kan{display:flex;gap:12px;overflow-x:auto;padding-bottom:10px;align-items:flex-start}
@@ -736,7 +743,9 @@ window.toggleSB=function(open){
 };
 document.addEventListener('click',e=>{
   if(!e.target.closest('.cu-menu')) document.getElementById('cu-drop')?.classList.remove('on');
+  if(!e.target.closest('.filter-menu')) document.getElementById('filter-pop')?.classList.remove('on');
 });
+window.toggleFilterPop=function(){ document.getElementById('filter-pop')?.classList.toggle('on'); };
 
 // ── NAV ──
 function updateNav(){
@@ -1023,27 +1032,35 @@ function rSimple(list, type){
       <div class="stat"><div class="stat-l" style="color:var(--amber)"><i class="ti ti-bell" style="font-size:12px"></i>Cần nhắc hôm nay</div><div class="stat-v" style="color:var(--amber)">${kpiUrg}</div></div>
       <div class="stat"><div class="stat-l" style="color:#BF360C"><i class="ti ti-crown" style="font-size:12px"></i>Khách VIP</div><div class="stat-v" style="color:#BF360C">${kpiVip}</div></div>
     </div>`;
+    const advCount=[advTier,advID,advStat].filter(Boolean).length;
     adv=kpi+`<div class="advbar">
-      <label>Lọc nâng cao:</label>
-      <select onchange="setAdv('tier',this.value)">
-        <option value="">— Hạng —</option>
-        <option value="vip"${advTier==='vip'?' selected':''}>VIP</option>
-        <option value="diamond"${advTier==='diamond'?' selected':''}>Diamond</option>
-        <option value="gold"${advTier==='gold'?' selected':''}>Gold</option>
-        <option value="none"${advTier==='none'?' selected':''}>Thường</option>
-      </select>
-      <select onchange="setAdv('id',this.value)">
-        <option value="">— ID —</option>
-        ${visibleIDs().map(id=>`<option value="${id}"${advID===id?' selected':''}>${id}</option>`).join('')}
-      </select>
-      <select onchange="setAdv('stat',this.value)">
-        <option value="">— Trạng thái —</option>
-        <option value="urg"${advStat==='urg'?' selected':''}>Cần nhắn ngay</option>
-        <option value="ok"${advStat==='ok'?' selected':''}>Còn hạn</option>
-        <option value="new"${advStat==='new'?' selected':''}>Chưa nhắn</option>
-      </select>
+      <div class="filter-menu">
+        <button class="filter-trig${advCount?' active':''}" onclick="toggleFilterPop()"><i class="ti ti-filter"></i> Bộ lọc${advCount?`<span class="badge b-blue">${advCount}</span>`:''}</button>
+        <div class="filter-pop" id="filter-pop">
+          <label>Hạng</label>
+          <select onchange="setAdv('tier',this.value)">
+            <option value="">— Tất cả hạng —</option>
+            <option value="vip"${advTier==='vip'?' selected':''}>VIP</option>
+            <option value="diamond"${advTier==='diamond'?' selected':''}>Diamond</option>
+            <option value="gold"${advTier==='gold'?' selected':''}>Gold</option>
+            <option value="none"${advTier==='none'?' selected':''}>Thường</option>
+          </select>
+          <label>ID tài khoản</label>
+          <select onchange="setAdv('id',this.value)">
+            <option value="">— Tất cả ID —</option>
+            ${visibleIDs().map(id=>`<option value="${id}"${advID===id?' selected':''}>${id}</option>`).join('')}
+          </select>
+          <label>Trạng thái</label>
+          <select onchange="setAdv('stat',this.value)">
+            <option value="">— Tất cả trạng thái —</option>
+            <option value="urg"${advStat==='urg'?' selected':''}>Cần nhắn ngay</option>
+            <option value="ok"${advStat==='ok'?' selected':''}>Còn hạn</option>
+            <option value="new"${advStat==='new'?' selected':''}>Chưa nhắn</option>
+          </select>
+          ${advCount?`<button class="fb" onclick="setAdv('tier','');setAdv('id','');setAdv('stat','')">Xóa lọc</button>`:''}
+        </div>
+      </div>
       <span style="font-size:11px;color:var(--text3)">${show.length} khách</span>
-      ${(advTier||advID||advStat)?`<button class="fb" onclick="setAdv('tier','');setAdv('id','');setAdv('stat','')">Xóa lọc</button>`:''}
       <span style="margin-left:auto">${viewToggleHtml()}</span>
     </div>`;
     document.getElementById('MC').innerHTML=adv+buildList(show);
