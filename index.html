@@ -123,7 +123,13 @@ body.dark .cmdbar::before{background:linear-gradient(90deg,transparent,rgba(0,22
 .pillnav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
 .pillnav .nb{width:auto;flex-direction:row;border-radius:9999px;padding:7px 12px;background:var(--card);border:1px solid var(--border);position:static}
 .pillnav .nb.on{background:var(--navy);color:#fff}
-.statusbar{padding:7px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:5px}
+.statusbar{padding:7px 20px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sb-grp{display:flex;align-items:center;gap:4px;white-space:nowrap}
+.sb-sep{opacity:.4}
+.sb-fill{flex:1}
+.sb-urg #sb-urg{color:var(--text3);font-weight:600}
+.sb-urg.on,.sb-urg.on #sb-urg{color:#C62828}
+@media (max-width:640px){ .sb-sep,.sb-grp:not(:first-child){display:none} }
 
 .btn-add{background:var(--navy);color:#fff;border:none;border-radius:9999px;padding:8px 16px;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:5px;font-family:var(--sans);font-weight:600;white-space:nowrap}
 body.dark .btn-add{background:var(--blue-dark);color:#08121f}
@@ -274,6 +280,9 @@ body.dark .kan-cnt{background:var(--blue-dark);color:#08121f}
 .ld{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
 .lt{font-size:12px;color:var(--text2);line-height:1.5;flex:1}
 .lti{font-size:11px;color:var(--text3);white-space:nowrap}
+#activity-timeline .li:last-child{border-bottom:none}
+.tl-more{display:block;text-align:center;font-size:11px;color:var(--blue);padding:8px 0 0;cursor:pointer;font-weight:600}
+.tl-more:hover{text-decoration:underline}
 
 /* MODAL */
 .mb{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:1000;padding:14px}
@@ -432,7 +441,7 @@ body.dark .sp-sv{background:var(--blue-dark);color:#08121f}
       <aside class="col-left">
         <div class="colcard">
           <div class="colcard-t"><i class="ti ti-activity"></i> Hoạt động gần đây</div>
-          <div class="ph-empty">Sẽ hiển thị ở giai đoạn sau</div>
+          <div id="activity-timeline"><div class="ph-empty">Chưa có hoạt động</div></div>
         </div>
       </aside>
 
@@ -465,7 +474,15 @@ body.dark .sp-sv{background:var(--blue-dark);color:#08121f}
       </aside>
     </div>
 
-    <footer class="statusbar"><span class="dot"></span><span id="sync-t">Đang kết nối...</span></footer>
+    <footer class="statusbar">
+      <span class="sb-grp"><span class="dot" id="sb-dot"></span><span id="sync-t">Đang kết nối...</span></span>
+      <span class="sb-sep">·</span>
+      <span class="sb-grp"><i class="ti ti-users" style="font-size:12px"></i><span id="sb-total">0</span> khách hàng</span>
+      <span class="sb-sep">·</span>
+      <span class="sb-grp sb-urg" id="sb-urg-wrap"><i class="ti ti-bell" style="font-size:12px"></i><span id="sb-urg">0</span> cần nhắn ngay</span>
+      <span class="sb-fill"></span>
+      <span class="sb-grp" id="sb-user"></span>
+    </footer>
   </div>
 </div>
 
@@ -593,6 +610,7 @@ function loginOK(u){
   const av=document.getElementById('cu-av');
   av.textContent=u.name[0];
   av.style.cssText=`background:${u.color}30;color:${u.color};width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700`;
+  document.getElementById('sb-user').innerHTML=`<i class="ti ti-user-circle" style="font-size:12px"></i>${u.name}`;
   loadTheme();
   startApp();
 }
@@ -630,7 +648,8 @@ const IDCOLS=['#185FA5','#0F6E56','#854F0B','#534AB7','#A32D2D','#3B6D11','#6338
 function startApp(){
   if(!DB){
     document.getElementById('sync-t').textContent='Chưa cấu hình Firebase';
-    updateNav(); refresh();
+    document.getElementById('sb-dot').style.background='#C62828';
+    updateNav(); refresh(); renderActivityTimeline();
     return;
   }
   onValue(ref(DB,'customers'),snap=>{
@@ -652,6 +671,7 @@ function startApp(){
     const v=snap.val()||{};
     LOGS=Object.values(v).sort((a,b)=>b.time-a.time).slice(0,500);
     if(pg==='log') renderLog();
+    renderActivityTimeline();
   });
 }
 
@@ -752,6 +772,7 @@ function updateNav(){
   const all=getAll();
   document.getElementById('b-all').textContent=all.length;
   document.getElementById('b-urg').textContent=getUrg().length;
+  updateStatusBar(all);
   document.getElementById('b-vip').textContent=all.filter(c=>c.vip==='vip').length;
   document.getElementById('b-dia').textContent=all.filter(c=>c.vip==='diamond').length;
   document.getElementById('b-gold').textContent=all.filter(c=>c.vip==='gold').length;
@@ -1364,6 +1385,33 @@ function renderLog(){
     const col=l.action==='add'?'#4CAF50':l.action==='delete'?'#C62828':l.action==='confirm'?'#D4A017':l.action==='import'?'#6A1B9A':'#1ed760';
     return`<div class="li"><div class="ld" style="background:${col}"></div><div class="lt">${l.detail}${l.by?` <span style="color:var(--text3)">· ${l.by}</span>`:''}</div><div class="lti">${l.timeStr||''}</div></div>`;
   }).join('')}</div>`;
+}
+function timeAgo(t){
+  if(!t) return '';
+  const s=Math.floor((Date.now()-t)/1000);
+  if(s<60) return 'Vừa xong';
+  if(s<3600) return Math.floor(s/60)+' phút trước';
+  if(s<86400) return Math.floor(s/3600)+' giờ trước';
+  return Math.floor(s/86400)+' ngày trước';
+}
+// ── ACTIVITY TIMELINE (col-left) — tái dùng dữ liệu LOGS của lịch sử thay đổi ──
+function renderActivityTimeline(){
+  const el=document.getElementById('activity-timeline');
+  if(!el) return;
+  if(!LOGS.length){ el.innerHTML='<div class="ph-empty">Chưa có hoạt động</div>'; return; }
+  const top=LOGS.slice(0,8);
+  el.innerHTML=top.map(l=>{
+    const col=l.action==='add'?'#4CAF50':l.action==='delete'?'#C62828':l.action==='confirm'?'#D4A017':l.action==='import'?'#6A1B9A':'#1ed760';
+    return`<div class="li"><div class="ld" style="background:${col}"></div><div class="lt">${l.detail}${l.by?` <span style="color:var(--text3)">· ${l.by}</span>`:''}</div><div class="lti">${timeAgo(l.time)}</div></div>`;
+  }).join('')+(LOGS.length>8?`<span class="tl-more" onclick="gP('log')">Xem tất cả lịch sử →</span>`:'');
+}
+// ── STATUS BAR ──
+function updateStatusBar(all){
+  all=all||getAll();
+  document.getElementById('sb-total').textContent=all.length;
+  const urg=all.filter(c=>needMsg(c)).length;
+  document.getElementById('sb-urg').textContent=urg;
+  document.getElementById('sb-urg-wrap').classList.toggle('on',urg>0);
 }
 
 // ── ACTIONS ──
