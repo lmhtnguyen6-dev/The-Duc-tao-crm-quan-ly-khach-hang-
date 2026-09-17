@@ -44,7 +44,8 @@ body.dark{
   --glass:rgba(18,18,22,.45);--shadow-glass:0 8px 30px rgba(0,0,0,.5);--glow-cyan:0 0 0 3px rgba(0,229,255,.22);
 }
 body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;-webkit-font-smoothing:antialiased;transition:background .2s,color .2s}
-.app{display:flex;height:100vh;overflow:hidden;position:relative}
+.app{display:flex;height:100vh;overflow:hidden;position:relative;opacity:0;transition:opacity .4s ease}
+.app.show{opacity:1}
 .app::before{content:'';position:fixed;top:0;left:0;right:0;height:260px;z-index:0;pointer-events:none;
   background:
     radial-gradient(620px 300px at 6% 0%,rgba(0,229,255,.16),transparent 60%),
@@ -346,7 +347,8 @@ body.dark .toast.ok{color:#0b2b0f}
 body.dark .toast.warn{color:#241a02}
 
 /* LOGIN */
-.ls{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9999;padding:14px}
+.ls{position:fixed;inset:0;background:var(--navy);display:flex;align-items:center;justify-content:center;z-index:9999;padding:14px;transition:opacity .4s ease;opacity:1}
+.ls.fade-out{opacity:0;pointer-events:none}
 .lc{background:#fff;border-radius:16px;padding:32px 36px;width:360px;max-width:100%;text-align:center}
 .lt2{font-family:var(--serif);font-size:20px;font-weight:700;color:#181818;margin-bottom:4px}
 .ls2{font-size:12px;color:#9A9A9A;margin-bottom:24px;font-style:italic}
@@ -615,8 +617,11 @@ window.doLogin=async function(){
 
 function loginOK(u){
   curU=u;
-  document.getElementById('LS').style.display='none';
-  document.getElementById('APP').style.display='flex';
+  const ls=document.getElementById('LS'), app=document.getElementById('APP');
+  ls.classList.add('fade-out');
+  app.style.display='flex';
+  requestAnimationFrame(()=>app.classList.add('show'));
+  setTimeout(()=>{ ls.style.display='none'; },400);
   const bar=document.getElementById('cu-bar'); bar.style.display='flex';
   document.getElementById('cu-nm').textContent=u.name;
   document.getElementById('cu-rl').textContent=u.role==='admin'?'Admin':'TV';
@@ -630,8 +635,11 @@ function loginOK(u){
 
 window.doLogout=function(){
   sessionStorage.removeItem('crm_u');
-  document.getElementById('APP').style.display='none';
-  document.getElementById('LS').style.display='flex';
+  const ls=document.getElementById('LS'), app=document.getElementById('APP');
+  app.classList.remove('show');
+  app.style.display='none';
+  ls.classList.remove('fade-out');
+  ls.style.display='flex';
   document.getElementById('step1').style.display='block';
   document.getElementById('step2').style.display='none';
 };
