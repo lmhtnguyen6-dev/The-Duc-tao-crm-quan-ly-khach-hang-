@@ -354,6 +354,7 @@ body.dark .sp-sv{background:var(--blue);color:#08121f}
       <div id="id-nav"></div>
       <div style="padding:6px 8px;margin-top:2px">
         <button class="nb" style="border:1px dashed rgba(255,255,255,.15);justify-content:center;color:rgba(255,255,255,.3);font-size:12px" onclick="openAddID()"><i class="ti ti-plus"></i>Thêm ID mới</button>
+        <button class="nb" style="border:1px dashed rgba(255,255,255,.15);justify-content:center;color:rgba(255,255,255,.3);font-size:12px" onclick="openMergeID()"><i class="ti ti-arrows-join"></i>Gộp / Xoá ID</button>
       </div>
     </div>
     <div class="sb-foot">
@@ -1564,6 +1565,37 @@ function saveID(){
   addLog('add','Tạo ID: '+nm); showToast('Đã tạo '+nm,'ok'); closeMD();
 }
 window.openAddID=openAddID; window.pickIC=pickIC; window.saveID=saveID;
+
+// ── GỘP / XOÁ ID ──
+function openMergeID(){
+  if(IDS.length<2){showToast('Cần ít nhất 2 ID để gộp!','warn');return;}
+  const opts=IDS.map(id=>{const n=Object.values(C).filter(c=>c.idNhom===id).length;return `<option value="${id}">${id} (${n} khách)</option>`;}).join('');
+  document.getElementById('MW').innerHTML=`<div class="mb" onclick="closeMD(event)"><div class="md" onclick="event.stopPropagation()" style="width:360px">
+    <div class="md-t"><span>Gộp ID</span><button class="mc-x" onclick="closeMD()">&times;</button></div>
+    <div class="fg"><label class="fl">Chuyển khách hàng từ ID</label><select class="fi" id="mid-from">${opts}</select></div>
+    <div class="fg"><label class="fl">Sang ID</label><select class="fi" id="mid-to">${opts}</select></div>
+    <div style="font-size:12px;color:#999;margin:-4px 0 12px">Toàn bộ khách hàng thuộc ID nguồn sẽ chuyển sang ID đích, sau đó ID nguồn bị xoá khỏi danh sách quản lý. Không thể hoàn tác.</div>
+    <button class="btn-sv" onclick="mergeID()">Xác nhận gộp</button>
+    <button class="btn-cc" onclick="closeMD()">Hủy</button>
+  </div></div>`;
+  document.getElementById('mid-to').selectedIndex=1;
+}
+function mergeID(){
+  const from=document.getElementById('mid-from').value;
+  const to=document.getElementById('mid-to').value;
+  if(from===to){showToast('Hai ID phải khác nhau!','warn');return;}
+  const keys=Object.entries(C).filter(([k,v])=>v.idNhom===from).map(([k])=>k);
+  if(!keys.length){ if(!confirm('ID '+from+' không có khách hàng nào. Vẫn xoá ID này khỏi danh sách?')) return; }
+  else if(!confirm('Chuyển '+keys.length+' khách hàng từ '+from+' sang '+to+' và xoá ID '+from+'?')) return;
+  const fixes={};
+  keys.forEach(k=>{fixes['customers/'+k+'/idNhom']=to; if(C[k])C[k]={...C[k],idNhom:to};});
+  const newIDS=IDS.filter(id=>id!==from);
+  const done=()=>{addLog('edit','Gộp ID: '+from+' → '+to+' ('+keys.length+' khách)');showToast('Đã chuyển '+keys.length+' khách và xoá ID '+from,'ok');closeMD();updateNav();refresh();};
+  if(DB){
+    (keys.length?update(ref(DB,'/'),fixes):Promise.resolve()).then(()=>set(ref(DB,'idList'),newIDS)).then(done).catch(()=>showToast('Lỗi khi gộp ID','warn'));
+  } else { IDS=newIDS; done(); }
+}
+window.openMergeID=openMergeID; window.mergeID=mergeID;
 
 // ── ĐỔI MẬT KHẨU ──
 function openPW(){
